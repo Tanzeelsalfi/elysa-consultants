@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="index, follow" />
+  <title>{% block title %}Elysa Consultants — Premier Engineering & Architecture{% endblock %}</title>
+  <meta name="description" content="{% block description %}Elysa Consultants — Professional consulting in Civil, Structural & Architectural Engineering, Surveying, and DPR Preparation across Kashmir and India.{% endblock %}" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/static/css/style.css" />
+
+  <script>
+    (function () {
+      const theme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+
+      <a href="/" class="nav-logo" aria-label="Elysa Consultants Home">
+        <span class="logo-text">Elysa</span>
+        <span class="logo-sub">Consultants</span>
+      </a>
+
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <ul class="nav-links" id="navLinks" role="navigation" aria-label="Main navigation">
+        <li><a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">Home</a></li>
+        <li><a href="/about" class="nav-link {% if request.path == '/about' %}active{% endif %}">About</a></li>
+        <li><a href="/projects" class="nav-link {% if request.path == '/projects' %}active{% endif %}">Projects</a></li>
+        <li><a href="/services" class="nav-link {% if request.path == '/services' %}active{% endif %}">Services</a></li>
+        <li><a href="/career" class="nav-link {% if request.path == '/career' %}active{% endif %}">Career</a></li>
+        <li><a href="/contact" class="nav-link nav-contact {% if request.path == '/contact' %}active{% endif %}">Contact</a></li>
+        <li class="theme-toggle-item">
+          <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Toggle theme">
+            <i class="fas fa-sun"></i>
+          </button>
+        </li>
+      </ul>
+
+    </div>
+  </nav>
+
+  <!-- PAGE CONTENT -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-container">
+
+      <div class="footer-brand">
+        <h2 class="footer-logo">Elysa Consultants</h2>
+        <p>Professional consulting services in architecture, structural engineering, surveying, DPR preparation, and infrastructure planning.</p>
+        <div class="footer-social">
+          <a href="https://www.instagram.com/elysa_architects?igsh=MWZ2eWM3Zm5kdDA2ag==" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="social-icon">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="https://wa.me/917006375455" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" class="social-icon">
+            <i class="fab fa-whatsapp"></i>
+          </a>
+          <a href="tel:+917006375455" aria-label="Call us" class="social-icon">
+            <i class="fas fa-phone"></i>
+          </a>
+          <a href="mailto:aakhoonrashiq@gmail.com" aria-label="Email us" class="social-icon">
+            <i class="fas fa-envelope"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-links">
+        <h3>Quick Links</h3>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/about">About</a></li>
+          <li><a href="/projects">Projects</a></li>
+          <li><a href="/services">Services</a></li>
+          <li><a href="/career">Career</a></li>
+          <li><a href="/contact">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-contact-info" id="contact-footer">
+        <h3>Contact Us</h3>
+        <div class="contact-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <a href="https://maps.app.goo.gl/A4fAmaMtQta7BzcG6?g_st=ic" target="_blank" rel="noopener noreferrer">
+            View Office Location
+          </a>
+        </div>
+        <div class="contact-item">
+          <i class="fas fa-phone"></i>
+          <a href="tel:+917006375455">+91 7006 375 455</a>
+        </div>
+        <div class="contact-item">
+          <i class="fas fa-envelope"></i>
+          <a href="mailto:aakhoonrashiq@gmail.com">aakhoonrashiq@gmail.com</a>
+        </div>
+        <div class="contact-item">
+          <i class="fas fa-clock"></i>
+          <span>Mon–Sat, 9 AM – 6 PM IST</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 Elysa Consultants. All Rights Reserved.</p>
+      <p class="footer-tagline">Engineering Tomorrow's Landmarks</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/static/js/main.js"></script>
+  {% block extra_scripts %}{% endblock %}
+
+</body>
+</html>

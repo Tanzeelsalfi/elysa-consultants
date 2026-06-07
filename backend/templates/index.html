@@ -1,0 +1,761 @@
+{% extends "base.html" %}
+
+{% block title %}Elysa Consultants — Premier Engineering & Architecture in Kashmir{% endblock %}
+{% block description %}Elysa Consultants provides professional civil, structural, and architectural engineering consulting services across Kashmir and India since 2017.{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ── REVIEWS SECTION ── */
+  .reviews-section {
+    padding: 90px 24px;
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border-subtle);
+    transition: background-color var(--transition), border-color var(--transition);
+  }
+  .reviews-container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .reviews-header-actions {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+  }
+  
+  /* ── REVIEWS GRID ── */
+  .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 28px;
+    margin-bottom: 20px;
+  }
+  .review-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 30px;
+    position: relative;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background-color var(--transition), color var(--transition);
+  }
+  .review-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--border);
+    box-shadow: var(--shadow-card);
+  }
+  .review-stars {
+    color: var(--gold);
+    font-size: 14px;
+    margin-bottom: 16px;
+    transition: color var(--transition);
+  }
+  .review-comment {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 20px;
+    font-style: italic;
+    transition: color var(--transition);
+  }
+  .review-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 16px;
+    transition: border-color var(--transition);
+  }
+  .review-avatar-fallback {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background-color var(--transition), color var(--transition);
+  }
+  .review-author-info h4 {
+    font-size: 15px;
+    color: var(--text-primary);
+    margin: 0 0 3px;
+    transition: color var(--transition);
+  }
+  .review-author-info span {
+    font-size: 11px;
+    color: var(--text-faint);
+    transition: color var(--transition);
+  }
+
+  /* ── WRITE REVIEW MODAL ── */
+  .review-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .review-modal-overlay.active {
+    display: flex;
+    opacity: 1;
+  }
+  .review-modal-content {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    width: 95%;
+    max-width: 500px;
+    padding: 36px;
+    position: relative;
+    box-shadow: var(--shadow-card);
+    transform: scale(0.9);
+    transition: transform 0.3s ease, background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
+  }
+  .review-modal-overlay.active .review-modal-content {
+    transform: scale(1);
+  }
+  .review-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+    transition: color var(--transition);
+  }
+  .review-modal-close:hover { color: var(--text-primary); }
+  .review-modal-content h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--text-primary);
+    margin-top: 0;
+    margin-bottom: 8px;
+    transition: color var(--transition);
+  }
+  .review-modal-content p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    transition: color var(--transition);
+  }
+  
+  /* Star Rating Selector */
+  .rating-selector {
+    display: flex;
+    gap: 8px;
+    font-size: 26px;
+    color: var(--text-faint);
+    cursor: pointer;
+    margin-bottom: 18px;
+    transition: color var(--transition);
+  }
+  .rating-selector i {
+    transition: color 0.2s ease, transform 0.1s ease;
+  }
+  .rating-selector i:hover {
+    transform: scale(1.15);
+  }
+  .rating-selector i.active {
+    color: var(--gold);
+  }
+
+  /* Form layouts */
+  .review-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .review-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .review-form-group label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: color var(--transition);
+  }
+  .review-form-group input,
+  .review-form-group textarea {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    transition: background-color var(--transition), border-color var(--transition), color var(--transition);
+  }
+  .review-form-group input:focus,
+  .review-form-group textarea:focus {
+    border-color: var(--gold);
+    outline: none;
+  }
+  .review-form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+  .review-form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+  }
+  .review-btn-submit {
+    flex: 2;
+    background: var(--gold);
+    color: #0f0f0f;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background var(--transition), color var(--transition);
+  }
+  .review-btn-submit:hover { background: var(--gold-light); }
+  .review-btn-submit:disabled { background: var(--bg-card); color: var(--text-faint); cursor: not-allowed; }
+  
+  .review-btn-cancel {
+    flex: 1;
+    background: var(--bg-card);
+    color: var(--text-muted);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 14px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: background var(--transition), border-color var(--transition), color var(--transition);
+  }
+  .review-btn-cancel:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+
+  /* Spinner */
+  .reviews-loading { text-align: center; padding: 40px; color: var(--text-muted); transition: color var(--transition); }
+  .reviews-spinner {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 3px solid var(--border-subtle);
+    border-top-color: var(--gold);
+    animation: reviews-spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes reviews-spin { to { transform: rotate(360deg); } }
+
+  .reviews-empty {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--text-muted);
+    transition: color var(--transition);
+  }
+  .reviews-empty i {
+    font-size: 48px;
+    opacity: 0.35;
+    margin-bottom: 16px;
+    display: block;
+  }
+  .reviews-empty h3 { color: var(--text-primary); font-size: 22px; margin-bottom: 8px; transition: color var(--transition); }
+
+  /* Toast notification rules (fallback) */
+  .apply-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--bg-secondary);
+    border-left: 4px solid var(--gold);
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-card);
+    color: var(--text-primary);
+    font-size: 14px;
+    z-index: 11000;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease, background-color var(--transition), color var(--transition);
+  }
+  .apply-toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .apply-toast.success { border-left-color: #2ec4b6; }
+  .apply-toast.error { border-left-color: #e71d36; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+<section class="hero-section" id="home" aria-label="Hero">
+  <div class="hero-overlay"></div>
+  <div class="hero-bg-image" style="background-image: url('https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=1600&q=80');"></div>
+
+  <div class="hero-content" data-animate="fadeUp">
+    <div class="hero-badge">Est. 2017 · Kashmir, India</div>
+    <h1>Designing Modern<br /><span class="hero-highlight">Architecture Spaces</span></h1>
+    <p class="hero-subtitle">
+      Professional consulting in Civil Engineering, Structural Engineering,<br />
+      Geotechnical Engineering, DPR Preparation, and Surveying Services.
+    </p>
+
+    <div class="hero-buttons">
+      <a href="/projects" class="btn btn-primary" id="hero-projects-btn">
+        <i class="fas fa-folder-open"></i> View Projects
+      </a>
+      <a href="#team-section" class="btn btn-ghost scroll-link" id="hero-team-btn">
+        <i class="fas fa-users"></i> Meet Our Team
+      </a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-number">500+</span>
+        <span class="stat-label">Projects Completed</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">9+</span>
+        <span class="stat-label">Years Experience</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">100%</span>
+        <span class="stat-label">Client Satisfaction</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURED PROJECT BOX -->
+  <div class="hero-project-box" data-animate="slideLeft">
+    <span class="project-tag"><i class="fas fa-award"></i> Our Portfolio</span>
+    <h3>Explore Our Signature Projects</h3>
+    <p>Discover premium residential, commercial, and infrastructure projects designed with innovation and engineering excellence.</p>
+    <a href="/projects" class="btn btn-gold" id="hero-explore-btn">View Projects →</a>
+  </div>
+</section>
+
+
+<!-- ABOUT SECTION -->
+<section class="about-section" id="about-section">
+  <div class="section-container">
+    <div class="about-image-wrap" data-animate="fadeLeft">
+      <img src="https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=800&q=80"
+           alt="Elysa Consultants Architecture" loading="lazy" />
+      <div class="about-image-accent"></div>
+    </div>
+
+    <div class="about-text" data-animate="fadeRight">
+      <span class="section-label">Who We Are</span>
+      <h2>About <span class="highlight">Our Company</span></h2>
+      <p>We are a Kashmir-based consultancy established in 2017, providing professional services in civil, structural, and architectural engineering.</p>
+      <p>Our multidisciplinary team has delivered landmark projects across Kashmir and the wider Indian subcontinent — from residential homes to large-scale commercial developments.</p>
+
+      <div class="about-features">
+        <div class="feature-item">
+          <i class="fas fa-check-circle"></i>
+          <span>Licensed Structural Engineers</span>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-check-circle"></i>
+          <span>End-to-End Project Delivery</span>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-check-circle"></i>
+          <span>Modern CAD & 3D Visualization</span>
+        </div>
+      </div>
+
+      <a href="/about" class="btn btn-outline" id="about-more-btn">Learn More →</a>
+    </div>
+  </div>
+</section>
+
+
+<!-- SERVICES SECTION -->
+<section class="services-section" id="services-section">
+  <div class="section-header" data-animate="fadeUp">
+    <span class="section-label">What We Do</span>
+    <h2>Our <span class="highlight">Services</span></h2>
+    <p>Comprehensive engineering solutions from concept to completion.</p>
+  </div>
+
+  <div class="services-grid" data-animate="fadeUp">
+
+    <div class="service-card" id="service-arch">
+      <div class="service-icon"><i class="fas fa-drafting-compass"></i></div>
+      <h3>Architecture Design</h3>
+      <p>Residential and commercial architecture planning with modern and sustainable design concepts.</p>
+    </div>
+
+    <div class="service-card" id="service-struct">
+      <div class="service-icon"><i class="fas fa-building"></i></div>
+      <h3>Structural Engineering</h3>
+      <p>RCC, steel structures, load analysis, and advanced structural consultancy solutions.</p>
+    </div>
+
+    <div class="service-card" id="service-geo">
+      <div class="service-icon"><i class="fas fa-mountain"></i></div>
+      <h3>Geotechnical Engineering</h3>
+      <p>Soil investigation, foundation design, and geotechnical consultancy for safe construction.</p>
+    </div>
+
+    <div class="service-card" id="service-survey">
+      <div class="service-icon"><i class="fas fa-map-marked-alt"></i></div>
+      <h3>Surveying Services</h3>
+      <p>Professional land surveying, site investigation, contour mapping, and DPR preparation.</p>
+    </div>
+
+    <div class="service-card" id="service-dpr">
+      <div class="service-icon"><i class="fas fa-file-alt"></i></div>
+      <h3>DPR Preparation</h3>
+      <p>Detailed Project Reports for government and private infrastructure projects.</p>
+    </div>
+
+    <div class="service-card" id="service-infra">
+      <div class="service-icon"><i class="fas fa-road"></i></div>
+      <h3>Infrastructure Planning</h3>
+      <p>Roads, bridges, water infrastructure, and urban development planning.</p>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- TEAM SECTION -->
+<section class="team-section" id="team-section">
+  <div class="section-header" data-animate="fadeUp">
+    <span class="section-label">The People Behind It</span>
+    <h2>Our <span class="highlight">Expert Team</span></h2>
+  </div>
+
+  <div class="team-slider-wrap" data-animate="fadeUp">
+
+    <div class="team-slider" id="teamSlider">
+
+      <div class="team-card" data-index="0">
+        <div class="team-avatar">
+          <img src="/static/images/Azmat.jpg" alt="Er. Azmat Hussain" loading="lazy"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+          <div class="avatar-fallback" style="display:none;"><i class="fas fa-user"></i></div>
+        </div>
+        <div class="team-info">
+          <h3>Er. Azmat Hussain</h3>
+          <p class="team-position">Senior Structural Engineer & Founder</p>
+          <span class="team-spec">Structural Design Specialist</span>
+        </div>
+      </div>
+
+      <div class="team-card" data-index="1">
+        <div class="team-avatar">
+          <div class="avatar-fallback"><i class="fas fa-user"></i></div>
+        </div>
+        <div class="team-info">
+          <h3>Er. Rameez Rashid</h3>
+          <p class="team-position">Senior Planning Engineer & Co-Founder</p>
+          <span class="team-spec">Planning & Execution</span>
+        </div>
+      </div>
+
+      <div class="team-card" data-index="2">
+        <div class="team-avatar">
+          <div class="avatar-fallback"><i class="fas fa-user"></i></div>
+        </div>
+        <div class="team-info">
+          <h3>Er. Gazanfer</h3>
+          <p class="team-position">Senior Civil Engineer</p>
+          <span class="team-spec">Civil Construction Specialist</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="team-controls">
+      <button class="team-btn" id="teamPrev" aria-label="Previous team member">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <div class="team-dots" id="teamDots">
+        <span class="dot active" data-index="0"></span>
+        <span class="dot" data-index="1"></span>
+        <span class="dot" data-index="2"></span>
+      </div>
+      <button class="team-btn" id="teamNext" aria-label="Next team member">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+
+  </div>
+</section>
+
+<!-- REVIEWS & TESTIMONIALS SECTION -->
+<section class="reviews-section" id="reviews-section">
+  <div class="reviews-container">
+    <div class="section-header" data-animate="fadeUp">
+      <span class="section-label">Client Feedback</span>
+      <h2>What Our <span class="highlight">Clients Say</span></h2>
+      <p>Read about their experiences working with Elysa Consultants.</p>
+    </div>
+
+    <div class="reviews-header-actions" data-animate="fadeUp">
+      <button class="btn btn-gold" onclick="openReviewModal()" id="write-review-btn">
+        <i class="fas fa-edit"></i> Write a Review
+      </button>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div class="reviews-loading" id="reviewsLoading">
+      <div class="reviews-spinner"></div>
+      <p>Loading reviews...</p>
+    </div>
+
+    <!-- Empty state -->
+    <div class="reviews-empty" id="reviewsEmpty" style="display:none;">
+      <i class="far fa-comments"></i>
+      <h3>No Reviews Yet</h3>
+      <p>Be the first to share your experience with Elysa Consultants!</p>
+    </div>
+
+    <!-- Reviews Grid -->
+    <div class="reviews-grid" id="reviewsGrid" style="display:none;">
+      <!-- Dynamically Populated -->
+    </div>
+  </div>
+</section>
+
+
+<!-- CTA SECTION -->
+<section class="cta-section" data-animate="fadeUp">
+  <div class="cta-content">
+    <h2>Ready to Start Your Project?</h2>
+    <p>Contact us today and let our expert team bring your vision to life.</p>
+    <a href="/contact" class="btn btn-gold" id="cta-contact-btn">Get In Touch →</a>
+  </div>
+</section>
+
+<!-- WRITE A REVIEW MODAL -->
+<div class="review-modal-overlay" id="reviewModalOverlay" aria-modal="true" role="dialog" aria-labelledby="reviewModalTitle">
+  <div class="review-modal-content">
+    <button class="review-modal-close" onclick="closeReviewModal()" aria-label="Close modal">&times;</button>
+    <h3 id="reviewModalTitle">Share Your Feedback</h3>
+    <p>We value your thoughts! Please rate your experience with us.</p>
+    
+    <form class="review-form" id="reviewForm" onsubmit="submitReview(event)">
+      <div class="review-form-group">
+        <label>Your Rating *</label>
+        <div class="rating-selector" id="starRatingSelector">
+          <i class="fas fa-star active" data-value="1"></i>
+          <i class="fas fa-star active" data-value="2"></i>
+          <i class="fas fa-star active" data-value="3"></i>
+          <i class="fas fa-star active" data-value="4"></i>
+          <i class="fas fa-star active" data-value="5"></i>
+        </div>
+        <input type="hidden" id="reviewRatingVal" value="5" />
+      </div>
+
+      <div class="review-form-group">
+        <label for="reviewName">Your Name *</label>
+        <input type="text" id="reviewName" required placeholder="John Doe" />
+      </div>
+      
+      <div class="review-form-group">
+        <label for="reviewComment">Review Comment *</label>
+        <textarea id="reviewComment" required placeholder="Tell us about the services we provided, structural quality, architecture designs, etc..."></textarea>
+      </div>
+
+      <div id="reviewModalError" style="color: #ff6b6b; font-size: 13px; display: none; padding: 5px 0;"></div>
+
+      <div class="review-form-actions">
+        <button type="button" class="review-btn-cancel" onclick="closeReviewModal()">Cancel</button>
+        <button type="submit" class="review-btn-submit" id="btnSubmitReview">
+          <span>Submit Review</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- TOAST FALLBACK -->
+<div class="apply-toast" id="applyToast">Review submitted successfully!</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/home.js"></script>
+<script>
+(function() {
+  const reviewsLoading = document.getElementById('reviewsLoading');
+  const reviewsGrid    = document.getElementById('reviewsGrid');
+  const reviewsEmpty   = document.getElementById('reviewsEmpty');
+  
+  const reviewModalOverlay = document.getElementById('reviewModalOverlay');
+  const reviewForm         = document.getElementById('reviewForm');
+  const ratingInput        = document.getElementById('reviewRatingVal');
+  const submitBtn          = document.getElementById('btnSubmitReview');
+  const modalError         = document.getElementById('reviewModalError');
+  const stars              = document.querySelectorAll('#starRatingSelector i');
+  const appToast           = document.getElementById('applyToast');
+
+  // Load and Render Reviews
+  function fetchReviews() {
+    fetch('/api/reviews')
+      .then(res => res.json())
+      .then(data => {
+        reviewsLoading.style.display = 'none';
+        if (!data || data.length === 0) {
+          reviewsEmpty.style.display = 'block';
+          reviewsGrid.style.display  = 'none';
+        } else {
+          reviewsEmpty.style.display = 'none';
+          reviewsGrid.style.display  = 'grid';
+          reviewsGrid.innerHTML      = data.map(renderReviewCard).join('');
+        }
+      })
+      .catch(() => {
+        reviewsLoading.style.display = 'none';
+        reviewsEmpty.style.display   = 'block';
+      });
+  }
+
+  function renderReviewCard(rev) {
+    const starHtml = Array.from({ length: 5 }, (_, i) => 
+      `<i class="${i < rev.rating ? 'fas' : 'far'} fa-star"></i>`
+    ).join('');
+    
+    const initials = (rev.name || 'Anonymous')
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
+
+    const formattedDate = rev.createdAt 
+      ? new Date(rev.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })
+      : '';
+
+    return `
+      <div class="review-card">
+        <div class="review-stars">${starHtml}</div>
+        <p class="review-comment">"${rev.comment}"</p>
+        <div class="review-author">
+          <div class="review-avatar-fallback">${initials}</div>
+          <div class="review-author-info">
+            <h4>${rev.name}</h4>
+            <span>${formattedDate ? `Submitted ${formattedDate}` : 'Verified Client'}</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // Interactive Stars
+  stars.forEach(star => {
+    star.addEventListener('click', function() {
+      const selectedVal = parseInt(this.getAttribute('data-value'));
+      ratingInput.value = selectedVal;
+      
+      stars.forEach((s, idx) => {
+        if (idx < selectedVal) {
+          s.classList.add('active', 'fas');
+          s.classList.remove('far');
+        } else {
+          s.classList.remove('active', 'fas');
+          s.classList.add('far');
+        }
+      });
+    });
+  });
+
+  window.openReviewModal = function() {
+    reviewForm.reset();
+    ratingInput.value = '5';
+    stars.forEach(s => {
+      s.classList.add('active', 'fas');
+      s.classList.remove('far');
+    });
+    modalError.style.display = 'none';
+    reviewModalOverlay.style.display = 'flex';
+    setTimeout(() => {
+      reviewModalOverlay.classList.add('active');
+    }, 10);
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeReviewModal = function() {
+    reviewModalOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+    setTimeout(() => {
+      reviewModalOverlay.style.display = 'none';
+    }, 300);
+  };
+
+  reviewModalOverlay.addEventListener('click', function(e) {
+    if (e.target === reviewModalOverlay) {
+      closeReviewModal();
+    }
+  });
+
+  function showToast(message, type = 'success') {
+    appToast.innerText = message;
+    appToast.className = `apply-toast show ${type}`;
+    setTimeout(() => {
+      appToast.classList.remove('show');
+    }, 4000);
+  }
+
+  window.submitReview = function(event) {
+    event.preventDefault();
+    modalError.style.display = 'none';
+
+    const submitBtnSpan = submitBtn.querySelector('span');
+    const originalText  = submitBtnSpan.innerText;
+    submitBtnSpan.innerText = 'Submitting...';
+    submitBtn.disabled = true;
+
+    const payload = {
+      name: document.getElementById('reviewName').value.trim(),
+      rating: parseInt(ratingInput.value),
+      comment: document.getElementById('reviewComment').value.trim()
+    };
+
+    fetch('/api/reviews', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(async res => {
+      const rData = await res.json();
+      if (!res.ok) {
+        throw new Error(rData.message || 'An error occurred.');
+      }
+      return rData;
+    })
+    .then(data => {
+      closeReviewModal();
+      fetchReviews();
+      showToast(data.message || 'Review submitted successfully!', 'success');
+    })
+    .catch(err => {
+      modalError.innerText = err.message;
+      modalError.style.display = 'block';
+      submitBtnSpan.innerText = originalText;
+      submitBtn.disabled = false;
+      showToast(err.message || 'Failed to submit review.', 'error');
+    });
+  };
+
+  fetchReviews();
+})();
+</script>
+{% endblock %}

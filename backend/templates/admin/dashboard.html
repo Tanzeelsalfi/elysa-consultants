@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Admin Dashboard — Elysa Consultants</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="/static/css/admin.css" />
+</head>
+<body class="admin-body">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i class="fas fa-shield-alt"></i>
+        <span>Elysa Admin</span>
+      </div>
+      <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-link active" data-tab="projects" id="nav-projects">
+        <i class="fas fa-folder-open"></i> Projects
+      </a>
+      <a href="#" class="sidebar-link" data-tab="team" id="nav-team">
+        <i class="fas fa-users-cog"></i> Manage Team
+      </a>
+      <a href="#" class="sidebar-link" data-tab="careers" id="nav-careers">
+        <i class="fas fa-briefcase"></i> Careers
+      </a>
+      <a href="#" class="sidebar-link" data-tab="contacts" id="nav-contacts">
+        <i class="fas fa-users"></i> Leads
+        <span class="badge" id="contactsBadge">0</span>
+      </a>
+      <a href="#" class="sidebar-link" data-tab="reviews" id="nav-reviews">
+        <i class="fas fa-star"></i> Reviews
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="/" target="_blank" class="sidebar-link">
+        <i class="fas fa-external-link-alt"></i> View Site
+      </a>
+      <button class="sidebar-link logout-btn" id="logoutBtn">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="admin-main" id="adminMain">
+
+    <!-- TOPBAR -->
+    <header class="admin-topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle sidebar">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="topbar-title" id="topbarTitle">Projects</div>
+      <div class="topbar-user">
+        <i class="fas fa-user-shield"></i>
+        <span>Admin</span>
+      </div>
+    </header>
+
+    <!-- AUTH CHECK LOADING -->
+    <div class="auth-loading" id="authLoading">
+      <div class="spinner"></div>
+      <p>Verifying access...</p>
+    </div>
+
+    <!-- DASHBOARD CONTENT (shown after auth) -->
+    <div class="dashboard-content" id="dashboardContent" style="display:none;">
+
+      <!-- ── PROJECTS TAB ─────────────────────────────── -->
+      <div class="tab-panel active" id="tab-projects">
+
+        <div class="panel-header">
+          <h2><i class="fas fa-folder-open"></i> Manage Projects</h2>
+          <button class="btn-add" id="openAddProjectBtn">
+            <i class="fas fa-plus"></i> Add Project
+          </button>
+        </div>
+
+        <!-- ADD PROJECT FORM (hidden by default) -->
+        <div class="add-project-form" id="addProjectForm" style="display:none;">
+          <h3><i class="fas fa-plus-circle"></i> Add New Project</h3>
+          <form id="projectForm" enctype="multipart/form-data" novalidate>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="proj-title">Project Title <span class="required">*</span></label>
+                <input type="text" id="proj-title" name="title" placeholder="e.g. Residential House In Kashmir" required maxlength="200" />
+              </div>
+
+              <div class="form-group">
+                <label for="proj-category">Category</label>
+                <select id="proj-category" name="category">
+                  <option value="Residential">Residential</option>
+                  <option value="Commercial">Commercial</option>
+                  <option value="Industrial">Industrial</option>
+                  <option value="Infrastructure">Infrastructure</option>
+                  <option value="General">General</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="proj-desc">Description <span class="required">*</span></label>
+              <textarea id="proj-desc" name="description" placeholder="Describe the project..." rows="3" required maxlength="1000"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="proj-images">Project Images <span class="required">*</span></label>
+              <div class="file-upload-area" id="fileUploadArea">
+                <input type="file" id="proj-images" name="images" accept=".jpg,.jpeg,.png,.webp" multiple required />
+                <div class="upload-placeholder">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  <p>Click or drag images here</p>
+                  <span>JPG, PNG, WebP — Max 5MB each</span>
+                </div>
+              </div>
+              <div class="image-previews" id="imagePreviews"></div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn-primary-admin" id="submitProjectBtn">
+                <i class="fas fa-save"></i> Save Project
+              </button>
+              <button type="button" class="btn-cancel" id="cancelAddProject">
+                Cancel
+              </button>
+            </div>
+
+            <div class="form-feedback" id="projectFormFeedback"></div>
+
+          </form>
+        </div>
+
+        <!-- PROJECTS LIST -->
+        <div class="projects-loading" id="adminProjectsLoading">
+          <div class="spinner"></div>
+          <p>Loading projects...</p>
+        </div>
+
+        <div class="projects-list" id="adminProjectsList" style="display:none;"></div>
+        <div class="empty-state" id="adminProjectsEmpty" style="display:none;">
+          <i class="fas fa-folder-open"></i>
+          <p>No projects yet. Add your first one above.</p>
+        </div>
+
+      </div>
+
+
+      <!-- ── TEAM TAB ─────────────────────────────────── -->
+      <div class="tab-panel" id="tab-team" style="display:none;">
+
+        <div class="panel-header">
+          <h2><i class="fas fa-users-cog"></i> Manage Team</h2>
+          <button class="btn-add" id="openAddEmployeeBtn">
+            <i class="fas fa-plus"></i> Add Team Member
+          </button>
+        </div>
+
+        <!-- ADD EMPLOYEE FORM (hidden by default) -->
+        <div class="add-project-form" id="addEmployeeForm" style="display:none; margin-bottom: 25px;">
+          <h3><i class="fas fa-plus-circle"></i> Add New Team Member</h3>
+          <form id="employeeForm" enctype="multipart/form-data" novalidate style="margin-top: 15px;">
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="emp-name">Full Name <span class="required">*</span></label>
+                <input type="text" id="emp-name" name="name" placeholder="e.g. Er. Azmat Hussain" required />
+              </div>
+
+              <div class="form-group">
+                <label for="emp-position">Position / Role <span class="required">*</span></label>
+                <input type="text" id="emp-position" name="position" placeholder="e.g. Senior Structural Engineer" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="emp-spec">Specialty / Subtitle</label>
+              <input type="text" id="emp-spec" name="spec" placeholder="e.g. Structural Design Specialist" />
+            </div>
+
+            <div class="form-group">
+              <label for="emp-photo">Photo</label>
+              <input type="file" id="emp-photo" name="photo" accept=".jpg,.jpeg,.png,.webp" />
+              <div class="image-previews" id="employeePhotoPreview"></div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn-primary-admin" id="submitEmployeeBtn">
+                <i class="fas fa-save"></i> Save Member
+              </button>
+              <button type="button" class="btn-cancel" id="cancelAddEmployee">
+                Cancel
+              </button>
+            </div>
+
+            <div class="form-feedback" id="employeeFormFeedback"></div>
+
+          </form>
+        </div>
+
+        <!-- TEAM LIST -->
+        <div class="projects-loading" id="adminTeamLoading">
+          <div class="spinner"></div>
+          <p>Loading team members...</p>
+        </div>
+
+        <div class="projects-list" id="adminTeamList" style="display:none;"></div>
+        <div class="empty-state" id="adminTeamEmpty" style="display:none;">
+          <i class="fas fa-users"></i>
+          <p>No team members yet. Add your first one above.</p>
+        </div>
+
+      </div>
+
+
+      <!-- ── CAREERS TAB ──────────────────────────────── -->
+      <div class="tab-panel" id="tab-careers" style="display:none;">
+
+        <div class="panel-header">
+          <h2><i class="fas fa-briefcase"></i> Manage Careers</h2>
+          <button class="btn-add" id="openAddCareerBtn">
+            <i class="fas fa-plus"></i> Add Career
+          </button>
+        </div>
+
+        <!-- ADD CAREER FORM -->
+        <div class="add-project-form" id="addCareerForm" style="display:none; margin-bottom:25px;">
+          <h3><i class="fas fa-plus-circle"></i> Add New Career Opportunity</h3>
+          <form id="careerForm" novalidate style="margin-top:15px;">
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="career-title">Job Title <span class="required">*</span></label>
+                <input type="text" id="career-title" name="title"
+                  placeholder="e.g. Structural Engineer" required maxlength="200" />
+              </div>
+              <div class="form-group">
+                <label for="career-type">Job Type</label>
+                <select id="career-type" name="type">
+                  <option value="full-time">Full-Time</option>
+                  <option value="part-time">Part-Time</option>
+                  <option value="contract">Contract</option>
+                  <option value="internship">Internship</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="career-location">Location</label>
+              <input type="text" id="career-location" name="location"
+                placeholder="e.g. Kashmir, India" maxlength="100" />
+            </div>
+
+            <div class="form-group">
+              <label for="career-desc">Job Description / Opportunities <span class="required">*</span></label>
+              <textarea id="career-desc" name="description"
+                placeholder="Describe responsibilities, requirements and opportunities..."
+                rows="4" required maxlength="2000"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="career-skills">Required Skills</label>
+              <input type="text" id="career-skills" name="skills"
+                placeholder="e.g. AutoCAD, Structural Analysis, RCC Design (comma separated)" />
+              <small style="color:#888; font-size:12px;">Separate multiple skills with commas</small>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn-primary-admin" id="submitCareerBtn">
+                <i class="fas fa-save"></i> Save Career
+              </button>
+              <button type="button" class="btn-cancel" id="cancelAddCareer">Cancel</button>
+            </div>
+
+            <div class="form-feedback" id="careerFormFeedback"></div>
+          </form>
+        </div>
+
+        <!-- CAREERS LIST -->
+        <div class="projects-loading" id="adminCareersLoading">
+          <div class="spinner"></div>
+          <p>Loading careers...</p>
+        </div>
+        <div class="projects-list" id="adminCareersList" style="display:none;"></div>
+        <div class="empty-state" id="adminCareersEmpty" style="display:none;">
+          <i class="fas fa-briefcase"></i>
+          <p>No career listings yet. Add your first one above.</p>
+        </div>
+
+      </div>
+
+
+      <!-- ── CONTACTS TAB (Leads) ──────────────────────────────────── -->
+      <div class="tab-panel" id="tab-contacts" style="display:none;">
+
+        <div class="panel-header">
+          <h2><i class="fas fa-users"></i> Project Leads</h2>
+          <button class="btn-refresh" id="refreshContactsBtn">
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+        </div>
+
+        <div class="contacts-loading" id="contactsLoading">
+          <div class="spinner"></div>
+          <p>Loading leads...</p>
+        </div>
+
+        <div class="messages-list" id="contactsList" style="display:none;"></div>
+        <div class="empty-state" id="contactsEmpty" style="display:none;">
+          <i class="fas fa-inbox"></i>
+          <p>No leads yet.</p>
+        </div>
+
+      </div>
+
+      <!-- ── REVIEWS TAB (Moderation) ──────────────────────────────────── -->
+      <div class="tab-panel" id="tab-reviews" style="display:none;">
+
+        <div class="panel-header">
+          <h2><i class="fas fa-star"></i> Client Reviews</h2>
+          <button class="btn-refresh" id="refreshReviewsBtn">
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+        </div>
+
+        <div class="contacts-loading" id="reviewsLoading">
+          <div class="spinner"></div>
+          <p>Loading reviews...</p>
+        </div>
+
+        <div class="messages-list" id="reviewsList" style="display:none;"></div>
+        <div class="empty-state" id="reviewsEmpty" style="display:none;">
+          <i class="far fa-comments"></i>
+          <p>No reviews yet.</p>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- DELETE CONFIRM MODAL -->
+    <div class="modal-overlay" id="deleteModal" style="display:none;">
+      <div class="modal-box">
+        <div class="modal-icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <h3>Delete Project?</h3>
+        <p>This action cannot be undone. The project and all its data will be permanently removed.</p>
+        <div class="modal-actions">
+          <button class="btn-danger" id="confirmDeleteBtn">
+            <i class="fas fa-trash"></i> Yes, Delete
+          </button>
+          <button class="btn-cancel" id="cancelDeleteBtn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT PROJECT MODAL -->
+    <div class="modal-overlay" id="editModal" style="display:none;">
+      <div class="modal-box" style="max-width: 600px; text-align: left;">
+        <h3><i class="fas fa-edit"></i> Edit Project</h3>
+        <form id="editProjectForm" enctype="multipart/form-data" novalidate style="margin-top: 15px;">
+          <input type="hidden" id="edit-proj-id" name="id" />
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="edit-proj-title">Project Title <span class="required">*</span></label>
+              <input type="text" id="edit-proj-title" name="title" required maxlength="200" />
+            </div>
+
+            <div class="form-group">
+              <label for="edit-proj-category">Category</label>
+              <select id="edit-proj-category" name="category">
+                <option value="Residential">Residential</option>
+                <option value="Commercial">Commercial</option>
+                <option value="Industrial">Industrial</option>
+                <option value="Infrastructure">Infrastructure</option>
+                <option value="General">General</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-proj-desc">Description <span class="required">*</span></label>
+            <textarea id="edit-proj-desc" name="description" rows="3" required maxlength="1000"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9rem;">Current Images (click trash icon to remove)</label>
+            <div id="editImageContainer" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-proj-images">Add New Images</label>
+            <div class="file-upload-area" id="editFileUploadArea">
+              <input type="file" id="edit-proj-images" name="images" accept=".jpg,.jpeg,.png,.webp" multiple />
+              <div class="upload-placeholder">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Click or drag images here to add more</p>
+              </div>
+            </div>
+            <div class="image-previews" id="editImagePreviews"></div>
+          </div>
+
+          <div class="form-actions" style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="submit" class="btn-primary-admin" id="saveEditProjectBtn" style="padding: 10px 20px;">
+              <i class="fas fa-save"></i> Save Changes
+            </button>
+            <button type="button" class="btn-cancel" id="cancelEditProject" style="padding: 10px 20px;">
+              Cancel
+            </button>
+          </div>
+
+          <div class="form-feedback" id="editProjectFeedback"></div>
+        </form>
+      </div>
+    </div>
+
+    <!-- EDIT EMPLOYEE MODAL -->
+    <div class="modal-overlay" id="editEmployeeModal" style="display:none;">
+      <div class="modal-box" style="max-width: 500px; text-align: left;">
+        <h3><i class="fas fa-user-edit"></i> Edit Team Member</h3>
+        <form id="editEmployeeForm" enctype="multipart/form-data" novalidate style="margin-top: 15px;">
+          <input type="hidden" id="edit-emp-id" name="id" />
+          
+          <div class="form-group">
+            <label for="edit-emp-name">Full Name <span class="required">*</span></label>
+            <input type="text" id="edit-emp-name" name="name" required maxlength="100" />
+          </div>
+
+          <div class="form-group">
+            <label for="edit-emp-position">Position <span class="required">*</span></label>
+            <input type="text" id="edit-emp-position" name="position" required placeholder="e.g. Senior Civil Engineer" maxlength="100" />
+          </div>
+
+          <div class="form-group">
+            <label for="edit-emp-spec">Specialty / Subtitle</label>
+            <input type="text" id="edit-emp-spec" name="spec" placeholder="e.g. Civil Construction Specialist" maxlength="100" />
+          </div>
+
+          <div class="form-group">
+            <label>Current Photo</label>
+            <div id="editEmpPhotoContainer" style="margin-bottom: 12px; max-width: 120px; border-radius: 6px; overflow: hidden; border: 1px solid #333; height: 120px; display: flex; align-items: center; justify-content: center; background: #14141f;"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-emp-photo">Upload New Photo</label>
+            <div class="file-upload-area" id="editEmpFileUploadArea">
+              <input type="file" id="edit-emp-photo" name="photo" accept=".jpg,.jpeg,.png,.webp" />
+              <div class="upload-placeholder">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Click to upload new photo</p>
+              </div>
+            </div>
+            <div class="image-previews" id="editEmpPhotoPreview"></div>
+          </div>
+
+          <div class="form-actions" style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="submit" class="btn-primary-admin" id="saveEditEmpBtn" style="padding: 10px 20px;">
+              <i class="fas fa-save"></i> Save Changes
+            </button>
+            <button type="button" class="btn-cancel" id="cancelEditEmpBtn" style="padding: 10px 20px;">
+              Cancel
+            </button>
+          </div>
+
+          <div class="form-feedback" id="editEmpFeedback"></div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/static/js/admin.js"></script>
+</body>
+</html>

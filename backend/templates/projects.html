@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Our Projects — Elysa Consultants{% endblock %}
+{% block description %}Explore Elysa Consultants' portfolio of residential, commercial, and infrastructure projects across Kashmir and India.{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="page-hero" id="projects-hero" aria-label="Projects hero">
+  <div class="page-hero-overlay"></div>
+  <div class="page-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=1600&q=80');"></div>
+  <div class="page-hero-content" data-animate="fadeUp">
+    <span class="page-hero-label">Our Portfolio</span>
+    <h1>Our <span class="highlight">Projects</span></h1>
+    <p>Explore our architectural, commercial, and infrastructure work across Kashmir and India.</p>
+  </div>
+</section>
+
+
+<!-- PROJECTS SECTION -->
+<section class="projects-section" id="projects-section">
+
+  <div class="section-header" data-animate="fadeUp">
+    <span class="section-label">What We've Built</span>
+    <h2>Our <span class="highlight">Work</span></h2>
+  </div>
+
+  <!-- CONTROLS (FILTER & SORT) -->
+  <div class="projects-controls" data-animate="fadeUp" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 40px; padding: 0 10px;">
+    
+    <!-- Category Filters -->
+    <div class="filter-group" style="display: flex; flex-wrap: wrap; gap: 10px;">
+      <button class="filter-btn active" data-filter="all" style="padding: 10px 20px; border-radius: 30px; border: 1px solid #c9a84c; background: rgba(201,168,76,0.1); color: #c9a84c; font-weight: 500; cursor: pointer; transition: all 0.3s; font-family: 'Inter', sans-serif; font-size: 0.88rem;">All</button>
+      <button class="filter-btn" data-filter="Residential" style="padding: 10px 20px; border-radius: 30px; border: 1px solid #333; background: transparent; color: #aaa; font-weight: 500; cursor: pointer; transition: all 0.3s; font-family: 'Inter', sans-serif; font-size: 0.88rem;">Residential</button>
+      <button class="filter-btn" data-filter="Commercial" style="padding: 10px 20px; border-radius: 30px; border: 1px solid #333; background: transparent; color: #aaa; font-weight: 500; cursor: pointer; transition: all 0.3s; font-family: 'Inter', sans-serif; font-size: 0.88rem;">Commercial</button>
+      <button class="filter-btn" data-filter="Industrial" style="padding: 10px 20px; border-radius: 30px; border: 1px solid #333; background: transparent; color: #aaa; font-weight: 500; cursor: pointer; transition: all 0.3s; font-family: 'Inter', sans-serif; font-size: 0.88rem;">Industrial</button>
+      <button class="filter-btn" data-filter="Infrastructure" style="padding: 10px 20px; border-radius: 30px; border: 1px solid #333; background: transparent; color: #aaa; font-weight: 500; cursor: pointer; transition: all 0.3s; font-family: 'Inter', sans-serif; font-size: 0.88rem;">Infrastructure</button>
+    </div>
+
+    <!-- Sorting Dropdown -->
+    <div class="sort-group" style="display: flex; align-items: center; gap: 10px;">
+      <label for="projectsSort" style="color: #888; font-size: 0.9rem; font-weight: 500; font-family: 'Inter', sans-serif;">Sort By:</label>
+      <select id="projectsSort" style="padding: 10px 20px; border-radius: 30px; border: 1px solid #333; background: #0a0a0f; color: #fff; font-weight: 500; cursor: pointer; outline: none; transition: border-color 0.3s; font-family: 'Inter', sans-serif; font-size: 0.88rem;">
+        <option value="newest">Date: Newest First</option>
+        <option value="oldest">Date: Oldest First</option>
+        <option value="name-asc">Title: A to Z</option>
+        <option value="name-desc">Title: Z to A</option>
+      </select>
+    </div>
+
+  </div>
+
+  <!-- LOADING STATE -->
+  <div class="projects-loading" id="projectsLoading">
+    <div class="spinner"></div>
+    <p>Loading projects...</p>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div class="projects-empty" id="projectsEmpty" style="display:none;">
+    <i class="fas fa-folder-open"></i>
+    <p>No projects found. Check back soon!</p>
+  </div>
+
+  <!-- PROJECTS GRID -->
+  <div class="projects-grid" id="projectsGrid" style="display:none;"></div>
+
+</section>
+
+
+<!-- LIGHTBOX OVERLAY -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Project details" style="display:none;">
+  <div class="lightbox-overlay" id="lightboxOverlay"></div>
+  <div class="lightbox-content">
+
+    <button class="lightbox-close" id="lightboxClose" aria-label="Close project">
+      <i class="fas fa-times"></i>
+    </button>
+
+    <div class="lightbox-image-wrap">
+      <img src="" alt="" class="lightbox-img" id="lightboxImg" />
+      <button class="lightbox-nav prev" id="lightboxPrev" aria-label="Previous image">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <button class="lightbox-nav next" id="lightboxNext" aria-label="Next image">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+      <div class="lightbox-counter" id="lightboxCounter">1 / 1</div>
+    </div>
+
+    <div class="lightbox-info">
+      <h2 id="lightboxTitle"></h2>
+      <p id="lightboxDesc"></p>
+      <span class="lightbox-category" id="lightboxCategory"></span>
+
+      <div class="lightbox-thumbs" id="lightboxThumbs"></div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- CTA -->
+<section class="cta-section" data-animate="fadeUp">
+  <div class="cta-content">
+    <h2>Have a Project in Mind?</h2>
+    <p>Tell us about your requirements and our engineers will get back to you.</p>
+    <a href="/contact" class="btn btn-gold" id="projects-cta-btn">Get a Consultation →</a>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/projects.js"></script>
+{% endblock %}

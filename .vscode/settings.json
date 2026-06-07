@@ -1,0 +1,11 @@
+{
+    "python-envs.defaultEnvManager": "ms-python.python:system",
+    "python.defaultInterpreterPath": "/opt/anaconda3/bin/python",
+    "python.pythonPath": "/opt/anaconda3/bin/python",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/backend",
+        "/opt/anaconda3/lib/python3.13/site-packages"
+    ],
+    "python.analysis.pythonPath": "/opt/anaconda3/bin/python",
+    "pylance.extraCommitChars": ""
+}

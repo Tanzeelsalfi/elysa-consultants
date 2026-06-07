@@ -1,0 +1,22 @@
+# Environment variables
+.env
+backend/.env
+
+# Python caching
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.egg-info/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# User uploads
+backend/static/uploads/
+
+# Large Archives
+backend.zip

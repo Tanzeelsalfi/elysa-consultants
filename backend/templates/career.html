@@ -1,0 +1,633 @@
+{% extends "base.html" %}
+
+{% block title %}Career — Elysa Consultants{% endblock %}
+{% block description %}Explore career opportunities at Elysa Consultants — join our team of professional civil, structural, and architectural engineers in Kashmir.{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ── CAREER HERO ── */
+  .career-hero {
+    height: 60vh;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url('https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=1600&q=80');
+    background-size: cover;
+    background-position: center;
+  }
+  .career-hero .hero-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.68); }
+  .career-hero .hero-content { position: relative; z-index: 2; text-align: center; }
+  .career-hero .hero-content h1 { font-size: 64px; font-family: 'Playfair Display', serif; margin-bottom: 16px; color: #ffffff; }
+  .career-hero .hero-content p { font-size: 19px; color: #d5d5d5; max-width: 580px; margin: 0 auto; line-height: 1.8; }
+
+  /* ── SECTION ── */
+  .career-section {
+    padding: 90px 24px;
+    background: var(--bg-primary);
+    min-height: 50vh;
+    transition: background-color var(--transition);
+  }
+  .career-section .section-header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+  .career-section .section-label {
+    display: inline-block;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+  .career-section h2 {
+    font-size: 44px;
+    font-family: 'Playfair Display', serif;
+    color: var(--text-primary);
+    transition: color var(--transition);
+  }
+  .career-section h2 .highlight { color: var(--gold); }
+
+  /* ── EMPTY STATE ── */
+  .career-empty {
+    text-align: center;
+    padding: 80px 24px;
+    color: var(--text-muted);
+    transition: color var(--transition);
+  }
+  .career-empty i {
+    font-size: 56px;
+    margin-bottom: 24px;
+    display: block;
+    opacity: 0.35;
+  }
+  .career-empty h3 { font-size: 26px; color: var(--text-primary); margin-bottom: 12px; transition: color var(--transition); }
+  .career-empty p { font-size: 16px; line-height: 1.8; max-width: 420px; margin: 0 auto; }
+
+  /* ── CAREER GRID ── */
+  .career-grid {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 28px;
+  }
+
+  /* ── CAREER CARD ── */
+  .career-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    padding: 32px;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background-color var(--transition), color var(--transition);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .career-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  }
+  .career-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--border);
+    box-shadow: var(--shadow-card);
+  }
+  .career-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(193,155,106,0.12);
+    border: 1px solid var(--border);
+    color: var(--gold);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 5px 12px;
+    border-radius: 30px;
+    margin-bottom: 18px;
+    align-self: flex-start;
+    transition: color var(--transition), background-color var(--transition), border-color var(--transition);
+  }
+  .career-card h3 {
+    font-size: 22px;
+    font-family: 'Playfair Display', serif;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    line-height: 1.3;
+    transition: color var(--transition);
+  }
+  .career-card .career-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 20px;
+    flex-grow: 1;
+    transition: color var(--transition);
+  }
+  .career-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+  .skill-tag {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 30px;
+    transition: background-color var(--transition), border-color var(--transition), color var(--transition);
+  }
+  .career-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    font-size: 13px;
+    color: var(--text-muted);
+    padding-top: 18px;
+    border-top: 1px solid var(--border-subtle);
+    margin-bottom: 18px;
+    transition: border-color var(--transition), color var(--transition);
+  }
+  .career-meta span { display: flex; align-items: center; gap: 6px; }
+  .career-meta i { color: var(--gold); transition: color var(--transition); }
+
+  /* ── APPLY BUTTON ── */
+  .btn-apply {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px 20px;
+    background: var(--gold);
+    color: #0f0f0f;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition), transform 0.2s ease;
+  }
+  .btn-apply:hover {
+    background: var(--gold-light);
+    transform: translateY(-1px);
+  }
+  .btn-apply:active {
+    transform: translateY(0);
+  }
+
+  /* ── MODAL OVERLAY ── */
+  .apply-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .apply-modal-overlay.active {
+    display: flex;
+    opacity: 1;
+  }
+  
+  /* ── MODAL CONTENT ── */
+  .apply-modal-content {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    width: 95%;
+    max-width: 550px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 36px;
+    position: relative;
+    box-shadow: var(--shadow-card);
+    transform: scale(0.9);
+    transition: transform 0.3s ease, background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
+  }
+  .apply-modal-overlay.active .apply-modal-content {
+    transform: scale(1);
+  }
+  .apply-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 24px;
+    cursor: pointer;
+    transition: color var(--transition);
+    line-height: 1;
+  }
+  .apply-modal-close:hover {
+    color: var(--text-primary);
+  }
+  .apply-modal-content h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    margin-top: 0;
+    transition: color var(--transition);
+  }
+  .apply-modal-content p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    transition: color var(--transition);
+  }
+  .apply-modal-content .highlight-job {
+    color: var(--gold);
+    font-weight: 600;
+    transition: color var(--transition);
+  }
+  
+  /* ── FORM ── */
+  .apply-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .form-group label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: color var(--transition);
+  }
+  .form-group input,
+  .form-group textarea {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    transition: border-color var(--transition), box-shadow var(--transition), background-color var(--transition), color var(--transition);
+  }
+  .form-group input:focus,
+  .form-group textarea:focus {
+    border-color: var(--gold);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(193, 155, 106, 0.2);
+  }
+  .form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+  
+  /* ── BUTTONS ── */
+  .form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+  }
+  .btn-submit {
+    flex: 2;
+    background: var(--gold);
+    color: #0f0f0f;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-submit:hover {
+    background: var(--gold-light);
+  }
+  .btn-submit:disabled {
+    background: var(--bg-card);
+    color: var(--text-faint);
+    cursor: not-allowed;
+  }
+  .btn-cancel {
+    flex: 1;
+    background: var(--bg-card);
+    color: var(--text-muted);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 14px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition), border-color var(--transition);
+    text-align: center;
+  }
+  .btn-cancel:hover {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+  }
+  
+  /* Toast Notification */
+  .apply-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--bg-secondary);
+    border-left: 4px solid var(--gold);
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-card);
+    color: var(--text-primary);
+    font-size: 14px;
+    z-index: 11000;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease, background-color var(--transition), color var(--transition);
+  }
+  .apply-toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .apply-toast.success { border-left-color: #2ec4b6; }
+  .apply-toast.error { border-left-color: #e71d36; }
+
+  /* Loading */
+  .career-loading { text-align: center; padding: 60px; color: var(--text-muted); transition: color var(--transition); }
+  .career-spinner {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 3px solid var(--border-subtle);
+    border-top-color: var(--gold);
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 768px) {
+    .career-hero .hero-content h1 { font-size: 40px; }
+    .career-section h2 { font-size: 32px; }
+    .apply-modal-content {
+      padding: 24px;
+      margin: 10px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- CAREER HERO -->
+<section class="career-hero" aria-label="Career hero">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-badge" style="display:inline-block; background:rgba(193,155,106,0.15); border:1px solid rgba(193,155,106,0.4); color:#c19b6a; font-size:13px; letter-spacing:1.5px; text-transform:uppercase; padding:7px 20px; border-radius:30px; margin-bottom:22px;">
+      Join Our Team
+    </div>
+    <h1>Build Your Career<br />With <span style="color:#c19b6a;">Elysa Consultants</span></h1>
+    <p>Be part of a passionate team shaping landmark infrastructure across Kashmir and beyond.</p>
+  </div>
+</section>
+
+
+<!-- CAREER LISTINGS -->
+<section class="career-section">
+  <div class="section-header">
+    <span class="section-label"><i class="fas fa-briefcase"></i> &nbsp;Opportunities</span>
+    <h2>Open <span class="highlight">Positions</span></h2>
+  </div>
+
+  <!-- Loading indicator -->
+  <div class="career-loading" id="careerLoading">
+    <div class="career-spinner"></div>
+    <p>Loading opportunities...</p>
+  </div>
+
+  <!-- Career grid (populated by JS) -->
+  <div class="career-grid" id="careerGrid" style="display:none;"></div>
+
+  <!-- Empty state -->
+  <div class="career-empty" id="careerEmpty" style="display:none;">
+    <i class="fas fa-briefcase"></i>
+    <h3>No Career Options Available</h3>
+    <p>We're not actively hiring right now, but we're always looking for talented engineers. Check back soon!</p>
+  </div>
+</section>
+
+<!-- APPLICATION MODAL -->
+<div class="apply-modal-overlay" id="applyModalOverlay" aria-modal="true" role="dialog" aria-labelledby="modalTitle">
+  <div class="apply-modal-content">
+    <button class="apply-modal-close" onclick="closeApplyModal()" aria-label="Close modal">&times;</button>
+    <h3 id="modalTitle">Apply for Position</h3>
+    <p>Applying for: <span class="highlight-job" id="modalJobTitle">...</span></p>
+    
+    <form class="apply-form" id="applyForm" onsubmit="submitApplication(event)">
+      <input type="hidden" id="applyJobId" name="jobId" />
+      <input type="hidden" id="applyJobTitleVal" name="jobTitle" />
+      
+      <div class="form-group">
+        <label for="applyName">Full Name *</label>
+        <input type="text" id="applyName" required placeholder="John Doe" />
+      </div>
+      
+      <div class="form-group">
+        <label for="applyEmail">Email Address *</label>
+        <input type="email" id="applyEmail" required placeholder="johndoe@example.com" />
+      </div>
+      
+      <div class="form-group">
+        <label for="applyPhone">Phone Number *</label>
+        <input type="tel" id="applyPhone" required placeholder="+91 98765 43210" />
+      </div>
+      
+      <div class="form-group">
+        <label for="applyResume">Resume / Portfolio Link</label>
+        <input type="url" id="applyResume" placeholder="Link to Google Drive, Dropbox, or LinkedIn" />
+      </div>
+      
+      <div class="form-group">
+        <label for="applyMessage">Cover Letter / Notes</label>
+        <textarea id="applyMessage" placeholder="Tell us why you are a good fit for this role..."></textarea>
+      </div>
+      
+      <div id="applyModalError" style="color: #ff6b6b; font-size: 13px; display: none; padding: 5px 0;"></div>
+      
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" onclick="closeApplyModal()">Cancel</button>
+        <button type="submit" class="btn-submit" id="btnSubmitApply">
+          <span>Submit Application</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div class="apply-toast" id="applyToast">Application submitted successfully!</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+  const loading = document.getElementById('careerLoading');
+  const grid    = document.getElementById('careerGrid');
+  const empty   = document.getElementById('careerEmpty');
+
+  const modalOverlay = document.getElementById('applyModalOverlay');
+  const modalJobTitle = document.getElementById('modalJobTitle');
+  const applyJobId = document.getElementById('applyJobId');
+  const applyJobTitleVal = document.getElementById('applyJobTitleVal');
+  const applyForm = document.getElementById('applyForm');
+  const applyModalError = document.getElementById('applyModalError');
+  const btnSubmitApply = document.getElementById('btnSubmitApply');
+  const applyToast = document.getElementById('applyToast');
+
+  function typeLabel(type) {
+    const map = { 'full-time': 'Full-Time', 'part-time': 'Part-Time', 'contract': 'Contract', 'internship': 'Internship' };
+    return map[type] || type || 'Full-Time';
+  }
+
+  function renderCard(job) {
+    const skills = (job.skills || []).map(s =>
+      `<span class="skill-tag">${s}</span>`
+    ).join('');
+
+    const postedDate = job.createdAt
+      ? new Date(job.createdAt).toLocaleDateString('en-IN', { year:'numeric', month:'short', day:'numeric' })
+      : '';
+
+    // Safeguard titles with quotes for inline JS execution
+    const safeTitle = (job.title || '').replace(/'/g, "\\'");
+
+    return `
+      <article class="career-card">
+        <div class="career-badge">
+          <i class="fas fa-circle" style="font-size:7px;"></i>
+          ${typeLabel(job.type)}
+        </div>
+        <h3>${job.title || 'Untitled Position'}</h3>
+        <p class="career-desc">${job.description || ''}</p>
+        ${skills ? `<div class="career-skills">${skills}</div>` : ''}
+        <div class="career-meta">
+          ${job.location ? `<span><i class="fas fa-map-marker-alt"></i> ${job.location}</span>` : ''}
+          ${postedDate ? `<span><i class="fas fa-calendar-alt"></i> Posted ${postedDate}</span>` : ''}
+        </div>
+        <button class="btn-apply" onclick="openApplyModal('${job._id}', '${safeTitle}')">Apply Now &rarr;</button>
+      </article>`;
+  }
+
+  window.openApplyModal = function(jobId, jobTitle) {
+    modalJobTitle.innerText = jobTitle;
+    applyJobId.value = jobId;
+    applyJobTitleVal.value = jobTitle;
+    applyModalError.style.display = 'none';
+    applyForm.reset();
+    
+    modalOverlay.style.display = 'flex';
+    setTimeout(() => {
+      modalOverlay.classList.add('active');
+    }, 10);
+    document.body.style.overflow = 'hidden';
+  }
+
+  window.closeApplyModal = function() {
+    modalOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+    setTimeout(() => {
+      modalOverlay.style.display = 'none';
+    }, 300);
+  }
+
+  modalOverlay.addEventListener('click', function(e) {
+    if (e.target === modalOverlay) {
+      closeApplyModal();
+    }
+  });
+
+  function showToast(message, type = 'success') {
+    applyToast.innerText = message;
+    applyToast.className = `apply-toast show ${type}`;
+    setTimeout(() => {
+      applyToast.classList.remove('show');
+    }, 4000);
+  }
+
+  window.submitApplication = function(event) {
+    event.preventDefault();
+    applyModalError.style.display = 'none';
+    
+    const submitBtnSpan = btnSubmitApply.querySelector('span');
+    const originalText = submitBtnSpan.innerText;
+    submitBtnSpan.innerText = 'Submitting...';
+    btnSubmitApply.disabled = true;
+
+    const payload = {
+      jobId: applyJobId.value,
+      jobTitle: applyJobTitleVal.value,
+      name: document.getElementById('applyName').value.trim(),
+      email: document.getElementById('applyEmail').value.trim(),
+      phone: document.getElementById('applyPhone').value.trim(),
+      resume: document.getElementById('applyResume').value.trim(),
+      message: document.getElementById('applyMessage').value.trim(),
+    };
+
+    fetch('/api/careers/apply', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(async res => {
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || 'An error occurred during submission.');
+      }
+      return data;
+    })
+    .then(data => {
+      closeApplyModal();
+      showToast(data.message || 'Application submitted successfully!', 'success');
+    })
+    .catch(err => {
+      applyModalError.innerText = err.message;
+      applyModalError.style.display = 'block';
+      submitBtnSpan.innerText = originalText;
+      btnSubmitApply.disabled = false;
+      showToast(err.message || 'Failed to submit application.', 'error');
+    });
+  }
+
+  fetch('/api/careers')
+    .then(r => r.json())
+    .then(data => {
+      loading.style.display = 'none';
+      if (!data || data.length === 0) {
+        empty.style.display = 'block';
+      } else {
+        grid.style.display = 'grid';
+        grid.innerHTML = data.map(renderCard).join('');
+      }
+    })
+    .catch(() => {
+      loading.style.display = 'none';
+      empty.style.display = 'block';
+    });
+})();
+</script>
+{% endblock %}
