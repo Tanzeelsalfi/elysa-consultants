@@ -204,7 +204,7 @@ export default function Services() {
             <p>Nearly a decade of delivering engineering excellence across Kashmir and India.</p>
           </div>
           <div className="why-card" id="why-proj">
-            <div className="why-number">50+</div>
+            <div className="why-number">500+</div>
             <h3>Projects Completed</h3>
             <p>From single-family homes to large commercial complexes, we've done it all.</p>
           </div>

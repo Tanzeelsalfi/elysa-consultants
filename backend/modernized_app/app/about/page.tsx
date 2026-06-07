@@ -168,8 +168,8 @@ export default function About() {
           <div className="timeline-item">
             <div className="timeline-year">2024</div>
             <div className="timeline-content">
-              <h3>50+ Projects Delivered</h3>
-              <p>Crossed a landmark of 50+ completed projects across Kashmir and India.</p>
+              <h3>500+ Projects Delivered</h3>
+              <p>Crossed a landmark of 500+ completed projects across Kashmir and India.</p>
             </div>
           </div>
         </div>

@@ -31,11 +31,29 @@ interface Lead {
   createdAt?: string;
 }
 
+interface Career {
+  _id: string;
+  title: string;
+  description: string;
+  skills?: string;
+  location?: string;
+  type: string;
+  createdAt?: string;
+}
+
+interface Review {
+  _id: string;
+  name: string;
+  rating: number;
+  comment: string;
+  createdAt?: string;
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
   const [authorized, setAuthorized] = useState(false);
   const [adminUser, setAdminUser] = useState("Admin");
-  const [activeTab, setActiveTab] = useState<"projects" | "team" | "contacts">("projects");
+  const [activeTab, setActiveTab] = useState<"projects" | "team" | "contacts" | "careers" | "reviews">("projects");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Toast notifications
@@ -77,6 +95,18 @@ export default function AdminDashboard() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [leadsLoading, setLeadsLoading] = useState(false);
 
+  // Careers State
+  const [careers, setCareers] = useState<Career[]>([]);
+  const [careersLoading, setCareersLoading] = useState(false);
+  const [addCareerOpen, setAddCareerOpen] = useState(false);
+  const [careerForm, setCareerForm] = useState({ title: "", description: "", skills: "", location: "", type: "full-time" });
+  const [careerFeedback, setCareerFeedback] = useState("");
+  const [careerSubmitting, setCareerSubmitting] = useState(false);
+
+  // Reviews State
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editFileInputRef = useRef<HTMLInputElement>(null);
   const empPhotoRef = useRef<HTMLInputElement>(null);
@@ -102,6 +132,8 @@ export default function AdminDashboard() {
           loadProjects();
           loadTeam();
           loadLeads();
+          loadCareers();
+          loadReviews();
         } else {
           router.push("/admin/login");
         }
@@ -436,6 +468,115 @@ export default function AdminDashboard() {
     }
   };
 
+  // ── CAREERS CRUD ──────────────────────────────────────────
+  const loadCareers = async () => {
+    setCareersLoading(true);
+    try {
+      const res = await fetch("/api/admin/careers");
+      if (res.ok) {
+        const data = await res.json();
+        setCareers(data);
+      }
+    } catch (err) {
+      showToast("Error loading careers", "danger");
+    } finally {
+      setCareersLoading(false);
+    }
+  };
+
+  const handleAddCareer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCareerFeedback("");
+
+    if (!careerForm.title.trim() || !careerForm.description.trim()) {
+      setCareerFeedback("Title and description are required.");
+      return;
+    }
+
+    setCareerSubmitting(true);
+    try {
+      const res = await fetch("/api/admin/careers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: careerForm.title,
+          description: careerForm.description,
+          skills: careerForm.skills,
+          location: careerForm.location,
+          type: careerForm.type,
+        }),
+      });
+
+      if (res.ok) {
+        showToast("Career listing added successfully", "success");
+        setCareerForm({ title: "", description: "", skills: "", location: "", type: "full-time" });
+        setAddCareerOpen(false);
+        loadCareers();
+      } else {
+        const data = await res.json();
+        setCareerFeedback(data.message || "Failed to add career.");
+      }
+    } catch {
+      setCareerFeedback("Network error. Please try again.");
+    } finally {
+      setCareerSubmitting(false);
+    }
+  };
+
+  const handleDeleteCareer = async (id: string, title: string) => {
+    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+
+    try {
+      const res = await fetch(`/api/admin/careers/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        showToast("Career listing deleted", "danger");
+        loadCareers();
+      } else {
+        showToast("Failed to delete career", "danger");
+      }
+    } catch {
+      showToast("Network error. Failed to delete career.", "danger");
+    }
+  };
+
+  // ── REVIEWS MODERATION ────────────────────────────────────
+  const loadReviews = async () => {
+    setReviewsLoading(true);
+    try {
+      const res = await fetch("/api/admin/reviews");
+      if (res.ok) {
+        const data = await res.json();
+        setReviews(data);
+      }
+    } catch (err) {
+      showToast("Error loading reviews", "danger");
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  const handleDeleteReview = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this review?")) return;
+
+    try {
+      const res = await fetch(`/api/admin/reviews/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        showToast("Review deleted successfully", "danger");
+        loadReviews();
+      } else {
+        showToast("Failed to delete review", "danger");
+      }
+    } catch {
+      showToast("Network error. Failed to delete review.", "danger");
+    }
+  };
+
   // Check auth load screen
   if (!authorized) {
     return (
@@ -488,8 +629,28 @@ export default function AdminDashboard() {
               setSidebarOpen(false);
             }}
           >
-            <i className="fas fa-users"></i> Leads
+            <i className="fas fa-envelope"></i> Leads
             {leads.length > 0 && <span className="badge visible">{leads.length}</span>}
+          </button>
+          <button
+            className={`sidebar-link ${activeTab === "careers" ? "active" : ""}`}
+            onClick={() => {
+              setActiveTab("careers");
+              setSidebarOpen(false);
+            }}
+          >
+            <i className="fas fa-briefcase"></i> Careers
+            {careers.length > 0 && <span className="badge visible">{careers.length}</span>}
+          </button>
+          <button
+            className={`sidebar-link ${activeTab === "reviews" ? "active" : ""}`}
+            onClick={() => {
+              setActiveTab("reviews");
+              setSidebarOpen(false);
+            }}
+          >
+            <i className="fas fa-comments"></i> Reviews
+            {reviews.length > 0 && <span className="badge visible">{reviews.length}</span>}
           </button>
         </nav>
 
@@ -511,7 +672,15 @@ export default function AdminDashboard() {
             <i className="fas fa-bars"></i>
           </button>
           <div className="topbar-title" id="topbarTitle">
-            {activeTab === "projects" ? "Projects" : activeTab === "team" ? "Manage Team" : "Leads"}
+            {activeTab === "projects"
+              ? "Projects"
+              : activeTab === "team"
+              ? "Manage Team"
+              : activeTab === "contacts"
+              ? "Leads"
+              : activeTab === "careers"
+              ? "Careers"
+              : "Reviews"}
           </div>
           <div className="topbar-user">
             <i className="fas fa-user-shield"></i>
@@ -971,6 +1140,261 @@ export default function AdminDashboard() {
                             onClick={() => handleDeleteLead(lead._id)}
                           >
                             <i className="fas fa-trash"></i> Delete Lead
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── CAREERS PANEL ──────────────────────────────── */}
+          {activeTab === "careers" && (
+            <div className="tab-panel active" id="tab-careers">
+              <div className="panel-header">
+                <h2>
+                  <i className="fas fa-briefcase"></i> Manage Careers
+                </h2>
+                <button className="btn-add" id="openAddCareerBtn" onClick={() => setAddCareerOpen(!addCareerOpen)}>
+                  {addCareerOpen ? <><i className="fas fa-times"></i> Cancel</> : <><i className="fas fa-plus"></i> Add Career</>}
+                </button>
+              </div>
+
+              {/* Add Career Form */}
+              {addCareerOpen && (
+                <div className="add-project-form" id="addCareerForm" style={{ display: "block", marginBottom: "25px" }}>
+                  <h3>
+                    <i className="fas fa-plus-circle"></i> Add New Career Listing
+                  </h3>
+                  <form id="careerForm" onSubmit={handleAddCareer} noValidate style={{ marginTop: "15px" }}>
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label htmlFor="career-title">
+                          Job Title <span className="required">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="career-title"
+                          value={careerForm.title}
+                          onChange={(e) => setCareerForm((prev) => ({ ...prev, title: e.target.value }))}
+                          placeholder="e.g. Structural Engineer"
+                          required
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="career-type">Job Type</label>
+                        <select
+                          id="career-type"
+                          value={careerForm.type}
+                          onChange={(e) => setCareerForm((prev) => ({ ...prev, type: e.target.value }))}
+                        >
+                          <option value="full-time">Full-Time</option>
+                          <option value="part-time">Part-Time</option>
+                          <option value="contract">Contract</option>
+                          <option value="internship">Internship</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label htmlFor="career-location">Location</label>
+                        <input
+                          type="text"
+                          id="career-location"
+                          value={careerForm.location}
+                          onChange={(e) => setCareerForm((prev) => ({ ...prev, location: e.target.value }))}
+                          placeholder="e.g. Srinagar, Kashmir"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="career-skills">Required Skills (comma separated)</label>
+                        <input
+                          type="text"
+                          id="career-skills"
+                          value={careerForm.skills}
+                          onChange={(e) => setCareerForm((prev) => ({ ...prev, skills: e.target.value }))}
+                          placeholder="e.g. AutoCAD, Revit, ETABS"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="career-desc">
+                        Job Description <span className="required">*</span>
+                      </label>
+                      <textarea
+                        id="career-desc"
+                        value={careerForm.description}
+                        onChange={(e) => setCareerForm((prev) => ({ ...prev, description: e.target.value }))}
+                        placeholder="Describe the responsibilities, requirements, etc..."
+                        rows={4}
+                        required
+                      ></textarea>
+                    </div>
+
+                    <div className="form-actions">
+                      <button type="submit" className="btn-primary-admin" id="submitCareerBtn" disabled={careerSubmitting}>
+                        {careerSubmitting ? <><i className="fas fa-spinner fa-spin"></i> Saving...</> : <><i className="fas fa-save"></i> Save Career</>}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-cancel"
+                        onClick={() => {
+                          setAddCareerOpen(false);
+                          setCareerForm({ title: "", description: "", skills: "", location: "", type: "full-time" });
+                          setCareerFeedback("");
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+
+                    {careerFeedback && (
+                      <div className="form-feedback error" style={{ display: "block" }}>
+                        {careerFeedback}
+                      </div>
+                    )}
+                  </form>
+                </div>
+              )}
+
+              {/* Careers List */}
+              {careersLoading ? (
+                <div className="projects-loading">
+                  <div className="spinner"></div>
+                  <p>Loading careers...</p>
+                </div>
+              ) : careers.length === 0 ? (
+                <div className="empty-state" style={{ display: "block" }}>
+                  <i className="fas fa-briefcase"></i>
+                  <p>No career listings yet. Add your first one above.</p>
+                </div>
+              ) : (
+                <div className="projects-list" style={{ display: "grid" }}>
+                  {careers.map((job) => {
+                    const typeLabel = { "full-time": "Full-Time", "part-time": "Part-Time", "contract": "Contract", "internship": "Internship" }[job.type] || job.type;
+                    const postedDate = job.createdAt ? new Date(job.createdAt).toLocaleDateString("en-IN", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric"
+                    }) : "";
+
+                    return (
+                      <div key={job._id} className="project-item">
+                        <div className="project-item-body" style={{ padding: "20px" }}>
+                          <div className="project-item-category">
+                            {typeLabel} {job.location ? `· ${job.location}` : ""}
+                          </div>
+                          <div className="project-item-title">{job.title}</div>
+                          <div className="project-item-desc" style={{ marginTop: "8px" }}>{job.description}</div>
+                          {job.skills && (
+                            <div style={{ marginTop: "10px", fontSize: "0.82rem", color: "#888" }}>
+                              <i className="fas fa-tools" style={{ color: "#c9a84c", marginRight: "6px" }}></i>
+                              {job.skills}
+                            </div>
+                          )}
+                          {postedDate && (
+                            <div style={{ marginTop: "6px", fontSize: "0.78rem", color: "#666" }}>
+                              <i className="fas fa-calendar-alt" style={{ marginRight: "6px" }}></i>
+                              Posted {postedDate}
+                            </div>
+                          )}
+                          <div style={{ marginTop: "14px" }}>
+                            <button
+                              className="btn-delete"
+                              style={{ padding: "6px 14px", fontSize: "0.82rem", marginTop: 0 }}
+                              onClick={() => handleDeleteCareer(job._id, job.title)}
+                            >
+                              <i className="fas fa-trash"></i> Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── REVIEWS PANEL ──────────────────────────────── */}
+          {activeTab === "reviews" && (
+            <div className="tab-panel active" id="tab-reviews">
+              <div className="panel-header">
+                <h2>
+                  <i className="fas fa-comments"></i> Reviews Moderation
+                </h2>
+                <button className="btn-refresh" id="refreshReviewsBtn" onClick={loadReviews}>
+                  <i className="fas fa-sync-alt"></i> Refresh
+                </button>
+              </div>
+
+              {reviewsLoading ? (
+                <div className="contacts-loading" style={{ display: "flex" }}>
+                  <div className="spinner"></div>
+                  <p>Loading reviews...</p>
+                </div>
+              ) : reviews.length === 0 ? (
+                <div className="empty-state" style={{ display: "block" }}>
+                  <i className="far fa-comments"></i>
+                  <p>No reviews yet.</p>
+                </div>
+              ) : (
+                <div className="messages-list" style={{ display: "flex" }}>
+                  {reviews.map((item) => {
+                    const reviewDate = item.createdAt
+                      ? new Date(item.createdAt).toLocaleDateString("en-IN", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "";
+
+                    return (
+                      <div key={item._id} className="message-card">
+                        <div className="message-card-header">
+                          <div>
+                            <div className="message-sender" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                              <span>{item.name}</span>
+                              <div style={{ display: "flex", gap: "2px" }}>
+                                {Array.from({ length: 5 }, (_, i) => (
+                                  <i
+                                    key={i}
+                                    className={`${i < item.rating ? "fas" : "far"} fa-star`}
+                                    style={{ color: "#f39c12", fontSize: "0.9rem" }}
+                                  ></i>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="message-date">{reviewDate}</div>
+                        </div>
+                        <div className="message-body">"{item.comment}"</div>
+                        <div className="message-card-actions" style={{ marginTop: "12px", display: "flex", justifyContent: "flex-end" }}>
+                          <button
+                            className="btn-delete"
+                            style={{
+                              padding: "6px 12px",
+                              fontSize: "0.8rem",
+                              background: "#e74c3c",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px",
+                            }}
+                            onClick={() => handleDeleteReview(item._id)}
+                          >
+                            <i className="fas fa-trash"></i> Delete Review
                           </button>
                         </div>
                       </div>
