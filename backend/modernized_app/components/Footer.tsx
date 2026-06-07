@@ -31,6 +31,15 @@ export default function Footer() {
             >
               <i className="fab fa-instagram"></i>
             </a>
+            <a
+              href="https://wa.me/917006375455"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="WhatsApp"
+              className="social-icon"
+            >
+              <i className="fab fa-whatsapp"></i>
+            </a>
             <a href="tel:+917006375455" aria-label="Call us" className="social-icon">
               <i className="fas fa-phone"></i>
             </a>
@@ -54,6 +63,9 @@ export default function Footer() {
             </li>
             <li>
               <Link href="/services">Services</Link>
+            </li>
+            <li>
+              <Link href="/career">Career</Link>
             </li>
             <li>
               <Link href="/contact">Contact</Link>

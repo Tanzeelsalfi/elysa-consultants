@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [theme, setTheme] = useState("dark");
   const pathname = usePathname();
 
   // Handle navbar styling on scroll
@@ -33,6 +34,19 @@ export default function Navbar() {
       document.body.style.overflow = "";
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    // Determine active theme on mount
+    const activeTheme = document.documentElement.getAttribute("data-theme") || localStorage.getItem("theme") || "dark";
+    setTheme(activeTheme);
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    document.documentElement.setAttribute("data-theme", nextTheme);
+    localStorage.setItem("theme", nextTheme);
+  };
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
@@ -102,12 +116,31 @@ export default function Navbar() {
           </li>
           <li>
             <Link
+              href="/career"
+              className={`nav-link ${pathname === "/career" ? "active" : ""}`}
+              onClick={closeMenu}
+            >
+              Career
+            </Link>
+          </li>
+          <li>
+            <Link
               href="/contact"
               className={`nav-link nav-contact ${pathname === "/contact" ? "active" : ""}`}
               onClick={closeMenu}
             >
               Contact
             </Link>
+          </li>
+          <li className="theme-toggle-item">
+            <button
+              id="themeToggleBtn"
+              className="theme-toggle-btn"
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+            >
+              <i className={`fas ${theme === "dark" ? "fa-sun" : "fa-moon"}`}></i>
+            </button>
           </li>
         </ul>
       </div>

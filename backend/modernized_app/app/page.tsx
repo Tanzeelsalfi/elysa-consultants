@@ -1,12 +1,105 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import TeamSlider from "@/components/TeamSlider";
 
+interface Review {
+  _id: string;
+  name: string;
+  rating: number;
+  comment: string;
+  createdAt?: string;
+}
+
 export default function Home() {
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [ratingVal, setRatingVal] = useState(5);
+  const [reviewForm, setReviewForm] = useState({ name: "", comment: "" });
+  const [modalError, setModalError] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+
+  const fetchReviews = async () => {
+    try {
+      const res = await fetch("/api/reviews");
+      if (res.ok) {
+        const data = await res.json();
+        setReviews(data || []);
+      }
+    } catch (err) {
+      console.error("Error fetching reviews:", err);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  const showToast = (message: string, type = "success") => {
+    setToast({ show: true, message, type });
+    setTimeout(() => {
+      setToast(prev => ({ ...prev, show: false }));
+    }, 4000);
+  };
+
+  const handleOpenReviewModal = () => {
+    setReviewForm({ name: "", comment: "" });
+    setRatingVal(5);
+    setModalError("");
+    setReviewModalOpen(true);
+    document.body.style.overflow = "hidden";
+  };
+
+  const handleCloseReviewModal = () => {
+    setReviewModalOpen(false);
+    document.body.style.overflow = "";
+  };
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setModalError("");
+
+    if (!reviewForm.name.trim() || !reviewForm.comment.trim()) {
+      setModalError("All fields are required.");
+      return;
+    }
+
+    setSubmittingReview(true);
+
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: reviewForm.name.trim(),
+          rating: ratingVal,
+          comment: reviewForm.comment.trim(),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        handleCloseReviewModal();
+        fetchReviews();
+        showToast(data.message || "Review submitted successfully!", "success");
+      } else {
+        setModalError(data.message || "Failed to submit review.");
+        showToast(data.message || "Failed to submit review.", "error");
+      }
+    } catch (err) {
+      setModalError("Network error. Please try again.");
+      showToast("Network error. Please try again.", "error");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
   // Intersection Observer for scroll animations (Faithfully recreating main.js logic)
   useEffect(() => {
+    fetchReviews();
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -251,6 +344,75 @@ export default function Home() {
         <TeamSlider />
       </section>
 
+      {/* REVIEWS & TESTIMONIALS SECTION */}
+      <section className="reviews-section" id="reviews-section">
+        <div className="reviews-container">
+          <div className="section-header" data-animate="fadeUp">
+            <span className="section-label">Client Feedback</span>
+            <h2>What Our <span className="highlight">Clients Say</span></h2>
+            <p>Read about their experiences working with Elysa Consultants.</p>
+          </div>
+
+          <div className="reviews-header-actions" data-animate="fadeUp">
+            <button className="btn btn-gold" onClick={handleOpenReviewModal} id="write-review-btn">
+              <i className="fas fa-edit"></i> Write a Review
+            </button>
+          </div>
+
+          {reviewsLoading ? (
+            <div className="reviews-loading" id="reviewsLoading">
+              <div className="reviews-spinner"></div>
+              <p>Loading reviews...</p>
+            </div>
+          ) : reviews.length === 0 ? (
+            <div className="reviews-empty" id="reviewsEmpty">
+              <i className="far fa-comments"></i>
+              <h3>No Reviews Yet</h3>
+              <p>Be the first to share your experience with Elysa Consultants!</p>
+            </div>
+          ) : (
+            <div className="reviews-grid" id="reviewsGrid">
+              {reviews.map((rev) => {
+                const initials = (rev.name || "Anonymous")
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase();
+                const formattedDate = rev.createdAt
+                  ? new Date(rev.createdAt).toLocaleDateString("en-IN", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : "";
+
+                return (
+                  <div className="review-card" key={rev._id}>
+                    <div className="review-stars">
+                      {Array.from({ length: 5 }).map((_, idx) => (
+                        <i
+                          className={`${idx < rev.rating ? "fas" : "far"} fa-star`}
+                          key={idx}
+                        ></i>
+                      ))}
+                    </div>
+                    <p className="review-comment">"{rev.comment}"</p>
+                    <div className="review-author">
+                      <div className="review-avatar-fallback">{initials}</div>
+                      <div className="review-author-info">
+                        <h4>{rev.name}</h4>
+                        <span>{formattedDate ? `Submitted ${formattedDate}` : "Verified Client"}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* CTA SECTION */}
       <section className="cta-section" data-animate="fadeUp">
         <div className="cta-content">
@@ -261,6 +423,97 @@ export default function Home() {
           </Link>
         </div>
       </section>
+
+      {/* WRITE A REVIEW MODAL */}
+      {reviewModalOpen && (
+        <div
+          className="review-modal-overlay active"
+          id="reviewModalOverlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) handleCloseReviewModal();
+          }}
+        >
+          <div className="review-modal-content">
+            <button
+              className="review-modal-close"
+              onClick={handleCloseReviewModal}
+              aria-label="Close modal"
+            >
+              &times;
+            </button>
+            <h3 id="reviewModalTitle">Share Your Feedback</h3>
+            <p>We value your thoughts! Please rate your experience with us.</p>
+
+            <form className="review-form" id="reviewForm" onSubmit={handleReviewSubmit}>
+              <div className="review-form-group">
+                <label>Your Rating *</label>
+                <div className="rating-selector" id="starRatingSelector">
+                  {[1, 2, 3, 4, 5].map((val) => (
+                    <i
+                      className={`${val <= ratingVal ? "fas active" : "far"} fa-star`}
+                      data-value={val}
+                      key={val}
+                      onClick={() => setRatingVal(val)}
+                    ></i>
+                  ))}
+                </div>
+              </div>
+
+              <div className="review-form-group">
+                <label htmlFor="reviewName">Your Name *</label>
+                <input
+                  type="text"
+                  id="reviewName"
+                  required
+                  placeholder="John Doe"
+                  value={reviewForm.name}
+                  onChange={(e) => setReviewForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+
+              <div className="review-form-group">
+                <label htmlFor="reviewComment">Review Comment *</label>
+                <textarea
+                  id="reviewComment"
+                  required
+                  placeholder="Tell us about the services we provided, structural quality, architecture designs, etc..."
+                  value={reviewForm.comment}
+                  onChange={(e) => setReviewForm(prev => ({ ...prev, comment: e.target.value }))}
+                ></textarea>
+              </div>
+
+              {modalError && (
+                <div style={{ color: "#ff6b6b", fontSize: "13px", padding: "5px 0" }}>
+                  {modalError}
+                </div>
+              )}
+
+              <div className="review-form-actions">
+                <button
+                  type="button"
+                  className="review-btn-cancel"
+                  onClick={handleCloseReviewModal}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="review-btn-submit"
+                  id="btnSubmitReview"
+                  disabled={submittingReview}
+                >
+                  <span>{submittingReview ? "Submitting..." : "Submit Review"}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* TOAST NOTIFICATION */}
+      <div className={`apply-toast ${toast.show ? "show" : ""} ${toast.type}`}>
+        {toast.message}
+      </div>
     </>
   );
 }

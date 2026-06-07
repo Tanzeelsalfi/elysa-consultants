@@ -12,8 +12,10 @@ export default function Contact() {
   const [errors, setErrors] = useState({
     name: "",
     email: "",
+    phone: "",
     message: "",
   });
+  const [countryCode, setCountryCode] = useState("+91");
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errorBanner, setErrorBanner] = useState("");
@@ -42,14 +44,20 @@ export default function Contact() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: "" }));
+    if (name === "phone") {
+      const digits = value.replace(/\D/g, "").slice(0, 10);
+      setFormData((prev) => ({ ...prev, [name]: digits }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
     setErrorBanner("");
   };
 
   const validateForm = () => {
     let isValid = true;
-    const newErrors = { name: "", email: "", message: "" };
+    const newErrors = { name: "", email: "", phone: "", message: "" };
 
     if (!formData.name.trim()) {
       newErrors.name = "Please enter your name.";
@@ -75,6 +83,13 @@ export default function Contact() {
       isValid = false;
     }
 
+    if (formData.phone.trim()) {
+      if (formData.phone.replace(/\D/g, "").length !== 10) {
+        newErrors.phone = "Phone number must be exactly 10 digits.";
+        isValid = false;
+      }
+    }
+
     setErrors(newErrors);
     return isValid;
   };
@@ -87,11 +102,17 @@ export default function Contact() {
 
     setSubmitting(true);
 
+    const formattedPhone = formData.phone ? `${countryCode} ${formData.phone}` : "";
+    const payload = {
+      ...formData,
+      phone: formattedPhone,
+    };
+
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -99,6 +120,7 @@ export default function Contact() {
       if (res.ok) {
         setSuccess(true);
         setFormData({ name: "", email: "", phone: "", message: "" });
+        setCountryCode("+91");
       } else {
         setErrorBanner(data.message || "Something went wrong. Please try again.");
       }
@@ -267,16 +289,30 @@ export default function Contact() {
                       <label htmlFor="contact-phone">
                         Phone Number <span className="optional">(optional)</span>
                       </label>
-                      <input
-                        type="tel"
-                        id="contact-phone"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        placeholder="e.g. +91 7006 375 455"
-                        autoComplete="tel"
-                        maxLength={20}
-                      />
+                      <div className="phone-input-container">
+                        <select
+                          id="contact-country-code"
+                          name="country-code"
+                          value={countryCode}
+                          onChange={(e) => setCountryCode(e.target.value)}
+                          className="phone-country-code"
+                        >
+                          <option value="+91">🇮🇳 +91</option>
+                          <option value="+1">🇺🇸 +1</option>
+                          <option value="+44">🇬🇧 +44</option>
+                        </select>
+                        <input
+                          type="tel"
+                          id="contact-phone"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          placeholder="e.g. 70063 75455"
+                          autoComplete="tel"
+                          className={errors.phone ? "error" : ""}
+                        />
+                      </div>
+                      {errors.phone && <span className="field-error">{errors.phone}</span>}
                     </div>
 
                     <div className="form-group">

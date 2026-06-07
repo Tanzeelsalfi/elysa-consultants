@@ -40,6 +40,14 @@ export default function RootLayout({
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
           precedence="default"
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function () {
+              const theme = localStorage.getItem('theme') || 'dark';
+              document.documentElement.setAttribute('data-theme', theme);
+            })();`,
+          }}
+        />
       </head>
       <body>
         <Navbar />
