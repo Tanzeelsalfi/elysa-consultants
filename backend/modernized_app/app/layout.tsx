@@ -4,6 +4,7 @@ import "./globals.css";
 import "./style.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import WhatsAppWidget from "@/components/WhatsAppWidget";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -53,7 +54,9 @@ export default function RootLayout({
         <Navbar />
         <main>{children}</main>
         <Footer />
+        <WhatsAppWidget />
       </body>
     </html>
   );
 }
+
