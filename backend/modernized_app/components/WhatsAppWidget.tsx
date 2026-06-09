@@ -8,6 +8,7 @@ export default function WhatsAppWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   // Constants
   const phoneNumber = "917006375455";
@@ -23,7 +24,6 @@ export default function WhatsAppWidget() {
 
     const day = istDate.getUTCDay(); // 0 = Sunday, 1-6 = Mon-Sat
     const hours = istDate.getUTCHours(); // 0-23
-    const minutes = istDate.getUTCMinutes(); // 0-59
 
     const isWorkDay = day >= 1 && day <= 6;
     const isWorkHour = hours >= 9 && hours < 18;
@@ -33,7 +33,6 @@ export default function WhatsAppWidget() {
 
   useEffect(() => {
     setMounted(true);
-    // Initial check
     setIsOnline(checkBusinessStatus());
 
     // Update status every minute
@@ -41,7 +40,15 @@ export default function WhatsAppWidget() {
       setIsOnline(checkBusinessStatus());
     }, 60000);
 
-    return () => clearInterval(interval);
+    // 4-second entrance delay
+    const delayTimer = setTimeout(() => {
+      setIsVisible(true);
+    }, 4000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(delayTimer);
+    };
   }, []);
 
   // Don't render on admin pages
@@ -57,7 +64,11 @@ export default function WhatsAppWidget() {
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(businessMessage)}`;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 font-sans flex flex-col items-end">
+    <div
+      className={`fixed bottom-6 right-6 z-50 font-sans flex flex-col items-end transition-all duration-1000 transform ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12 pointer-events-none"
+      }`}
+    >
       {/* CHAT CARD */}
       <div
         className={`mb-4 w-80 rounded-2xl shadow-2xl transition-all duration-300 transform origin-bottom-right ${
@@ -160,49 +171,68 @@ export default function WhatsAppWidget() {
         </div>
       </div>
 
-      {/* FLOATING ACTION TRIGGER */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-14 h-14 rounded-full flex items-center justify-center shadow-2xl relative transition-all duration-300 transform hover:scale-105 active:scale-95 group focus:outline-none"
-        aria-label="Contact us on WhatsApp"
-        style={{
-          background: "rgba(18, 18, 24, 0.75)",
-          backdropFilter: "blur(15px)",
-          WebkitBackdropFilter: "blur(15px)",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
-          boxShadow: "0 10px 30px rgba(0, 0, 0, 0.3)",
-        }}
-      >
-        {/* Pulsing indicator ring */}
-        <span
-          className={`absolute -inset-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-ping -z-10 ${
-            isOnline ? "bg-emerald-500/20" : "bg-[#c9a84c]/20"
-          }`}
-          style={{ animationDuration: "2s" }}
-        ></span>
+      {/* TRIGGER CONTAINER WITH TOOLTIP */}
+      <div className="flex items-center group cursor-pointer">
+        {/* Sleek Glassmorphic Tooltip */}
+        {!isOpen && (
+          <div
+            className="opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 pointer-events-none transition-all duration-300 mr-3.5 py-2 px-3.5 rounded-xl text-xs text-white font-medium tracking-wide whitespace-nowrap"
+            style={{
+              background: "rgba(18, 18, 24, 0.75)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.25)",
+            }}
+          >
+            Need structural advice? Chat with us!
+          </div>
+        )}
 
-        {/* Dynamic status colored ring */}
-        <span
-          className={`absolute -inset-0.5 rounded-full border-2 -z-10 ${
-            isOnline ? "border-emerald-500/30" : "border-[#c9a84c]/30"
-          }`}
-        ></span>
-
-        {/* WhatsApp Icon */}
-        <i
-          className="fab fa-whatsapp text-2xl transition-all duration-300"
+        {/* FLOATING ACTION TRIGGER */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-14 h-14 rounded-full flex items-center justify-center shadow-2xl relative transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none"
+          aria-label="Contact us on WhatsApp"
           style={{
-            color: isOnline ? "#25D366" : "#c9a84c",
+            background: "rgba(18, 18, 24, 0.75)",
+            backdropFilter: "blur(15px)",
+            WebkitBackdropFilter: "blur(15px)",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            boxShadow: "0 10px 30px rgba(0, 0, 0, 0.3)",
           }}
-        ></i>
+        >
+          {/* Pulsing indicator ring */}
+          <span
+            className={`absolute -inset-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-ping -z-10 ${
+              isOnline ? "bg-emerald-500/20" : "bg-[#c9a84c]/20"
+            }`}
+            style={{ animationDuration: "2s" }}
+          ></span>
 
-        {/* Pulsing Dot indicator */}
-        <span
-          className={`absolute top-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-[#121218] ${
-            isOnline ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
-          }`}
-        ></span>
-      </button>
+          {/* Dynamic status colored ring */}
+          <span
+            className={`absolute -inset-0.5 rounded-full border-2 -z-10 ${
+              isOnline ? "border-emerald-500/30" : "border-[#c9a84c]/30"
+            }`}
+          ></span>
+
+          {/* WhatsApp Icon */}
+          <i
+            className="fab fa-whatsapp text-2xl transition-all duration-300"
+            style={{
+              color: isOnline ? "#25D366" : "#c9a84c",
+            }}
+          ></i>
+
+          {/* Pulsing Dot indicator */}
+          <span
+            className={`absolute top-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-[#121218] ${
+              isOnline ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+            }`}
+          ></span>
+        </button>
+      </div>
     </div>
   );
 }
