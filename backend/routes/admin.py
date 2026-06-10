@@ -183,7 +183,9 @@ def admin_add_project():
         images = []
         files = request.files.getlist("images")
         for file in files:
-            if file and allowed_file(file.filename):
+            if file and file.filename:
+                if not allowed_file(file.filename):
+                    return jsonify({"message": f"Invalid file format: {file.filename}. Allowed: jpg, jpeg, png, webp"}), 400
                 mimetype = file.content_type or "image/jpeg"
                 file_bytes = file.read()
                 base64_data = base64.b64encode(file_bytes).decode("utf-8")
@@ -266,7 +268,9 @@ def admin_update_project(id):
         # Handle new image uploads
         files = request.files.getlist("images")
         for file in files:
-            if file and allowed_file(file.filename):
+            if file and file.filename:
+                if not allowed_file(file.filename):
+                    return jsonify({"message": f"Invalid file format: {file.filename}. Allowed: jpg, jpeg, png, webp"}), 400
                 mimetype = file.content_type or "image/jpeg"
                 file_bytes = file.read()
                 base64_data = base64.b64encode(file_bytes).decode("utf-8")
@@ -362,7 +366,9 @@ def admin_add_employee():
         # Handle photo upload
         photo_url = ""
         file = request.files.get("photo")
-        if file and allowed_file(file.filename):
+        if file and file.filename:
+            if not allowed_file(file.filename):
+                return jsonify({"message": "Invalid file format. Allowed: jpg, jpeg, png, webp"}), 400
             mimetype = file.content_type or "image/jpeg"
             file_bytes = file.read()
             base64_data = base64.b64encode(file_bytes).decode("utf-8")
@@ -423,7 +429,9 @@ def admin_edit_employee(id):
 
         # Handle photo upload
         file = request.files.get("photo")
-        if file and allowed_file(file.filename):
+        if file and file.filename:
+            if not allowed_file(file.filename):
+                return jsonify({"message": "Invalid file format. Allowed: jpg, jpeg, png, webp"}), 400
             mimetype = file.content_type or "image/jpeg"
             file_bytes = file.read()
             base64_data = base64.b64encode(file_bytes).decode("utf-8")

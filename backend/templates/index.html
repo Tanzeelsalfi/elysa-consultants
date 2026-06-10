@@ -444,40 +444,8 @@
 
     <div class="team-slider" id="teamSlider">
 
-      <div class="team-card" data-index="0">
-        <div class="team-avatar">
-          <img src="/static/images/Azmat.jpg" alt="Er. Azmat Hussain" loading="lazy"
-               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-          <div class="avatar-fallback" style="display:none;"><i class="fas fa-user"></i></div>
-        </div>
-        <div class="team-info">
-          <h3>Er. Azmat Hussain</h3>
-          <p class="team-position">Senior Structural Engineer & Founder</p>
-          <span class="team-spec">Structural Design Specialist</span>
-        </div>
-      </div>
+      <!-- Dynamically Populated Team Members -->
 
-      <div class="team-card" data-index="1">
-        <div class="team-avatar">
-          <div class="avatar-fallback"><i class="fas fa-user"></i></div>
-        </div>
-        <div class="team-info">
-          <h3>Er. Rameez Rashid</h3>
-          <p class="team-position">Senior Planning Engineer & Co-Founder</p>
-          <span class="team-spec">Planning & Execution</span>
-        </div>
-      </div>
-
-      <div class="team-card" data-index="2">
-        <div class="team-avatar">
-          <div class="avatar-fallback"><i class="fas fa-user"></i></div>
-        </div>
-        <div class="team-info">
-          <h3>Er. Gazanfer</h3>
-          <p class="team-position">Senior Civil Engineer</p>
-          <span class="team-spec">Civil Construction Specialist</span>
-        </div>
-      </div>
 
     </div>
 
@@ -755,7 +723,92 @@
     });
   };
 
+  // Fetch Dynamic Team Members
+  function fetchTeam() {
+    fetch('/api/employees')
+      .then(res => res.json())
+      .then(data => {
+        const teamSlider = document.getElementById('teamSlider');
+        const teamDots = document.getElementById('teamDots');
+        if (!teamSlider || !teamDots) return;
+
+        if (!data || data.length === 0) {
+          // If no team in DB, fallback to generic empty state
+          teamSlider.innerHTML = '<p style="text-align:center; color:#888;">Our team will be updated soon.</p>';
+          teamDots.innerHTML = '';
+          return;
+        }
+
+        let sliderHtml = '';
+        let dotsHtml = '';
+
+        data.forEach((member, i) => {
+          sliderHtml += `
+            <div class="team-card" data-index="${i}" ${i !== 0 ? 'style="display:none;"' : ''}>
+              <div class="team-avatar">
+                ${member.photo ? 
+                  `<img src="${member.photo}" alt="${member.name}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />` : ''}
+                <div class="avatar-fallback" ${member.photo ? 'style="display:none;"' : ''}><i class="fas fa-user"></i></div>
+              </div>
+              <div class="team-info">
+                <h3>${member.name}</h3>
+                <p class="team-position">${member.position || 'Staff'}</p>
+                <span class="team-spec">${member.spec || ''}</span>
+              </div>
+            </div>`;
+          dotsHtml += `<span class="dot ${i === 0 ? 'active' : ''}" data-index="${i}"></span>`;
+        });
+
+        teamSlider.innerHTML = sliderHtml;
+        teamDots.innerHTML = dotsHtml;
+
+        // Re-initialize slider events after rendering
+        initTeamSlider();
+      })
+      .catch(err => console.error("Error fetching team:", err));
+  }
+
+  function initTeamSlider() {
+    const cards = document.querySelectorAll('.team-card');
+    const dots = document.querySelectorAll('.team-dots .dot');
+    const prevBtn = document.getElementById('teamPrev');
+    const nextBtn = document.getElementById('teamNext');
+    let currentIndex = 0;
+
+    if (!cards.length) return;
+
+    function showSlide(index) {
+      cards.forEach(c => c.style.display = 'none');
+      dots.forEach(d => d.classList.remove('active'));
+
+      if (cards[index]) cards[index].style.display = 'block';
+      if (dots[index]) dots[index].classList.add('active');
+    }
+
+    if (prevBtn) {
+      prevBtn.onclick = () => {
+        currentIndex = (currentIndex === 0) ? cards.length - 1 : currentIndex - 1;
+        showSlide(currentIndex);
+      };
+    }
+
+    if (nextBtn) {
+      nextBtn.onclick = () => {
+        currentIndex = (currentIndex === cards.length - 1) ? 0 : currentIndex + 1;
+        showSlide(currentIndex);
+      };
+    }
+
+    dots.forEach(dot => {
+      dot.onclick = () => {
+        currentIndex = parseInt(dot.getAttribute('data-index'));
+        showSlide(currentIndex);
+      };
+    });
+  }
+
   fetchReviews();
+  fetchTeam();
 })();
 </script>
 {% endblock %}
