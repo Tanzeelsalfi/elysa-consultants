@@ -79,7 +79,6 @@ export default function AdminDashboard() {
   const [editSubmitting, setEditSubmitting] = useState(false);
 
   // Delete Project Confirm
-  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   // Team State
   const [team, setTeam] = useState<TeamMember[]>([]);
@@ -259,25 +258,6 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteProject = async () => {
-    if (!deleteTargetId) return;
-
-    try {
-      const res = await fetch(`/api/admin/projects/${deleteTargetId}`, {
-        method: "DELETE",
-      });
-
-      if (res.ok) {
-        showToast("Project deleted successfully", "danger");
-        setDeleteTargetId(null);
-        loadProjects();
-      } else {
-        showToast("Failed to delete project", "danger");
-      }
-    } catch {
-      showToast("Network error. Failed to delete project.", "danger");
-    }
-  };
 
   // ── EDIT PROJECT MODAL ─────────────────────────────────────
   const openEditModal = (proj: Project) => {
@@ -984,7 +964,19 @@ export default function AdminDashboard() {
                           <button
                             className="btn-delete"
                             style={{ padding: "6px 12px", fontSize: "0.82rem", marginTop: 0 }}
-                            onClick={() => setDeleteTargetId(proj._id)}
+                            onClick={() => showDeleteConfirm(
+                              'Delete Project',
+                              `Permanently delete "${proj.title}"? The project and all its images will be removed.`,
+                              async () => {
+                                const res = await fetch(`/api/admin/projects/${proj._id}`, { method: "DELETE" });
+                                if (res.ok) {
+                                  showToast("Project deleted successfully", "danger");
+                                  loadProjects();
+                                } else {
+                                  showToast("Failed to delete project", "danger");
+                                }
+                              }
+                            )}
                           >
                             <i className="fas fa-trash"></i> Delete
                           </button>
@@ -1550,26 +1542,6 @@ export default function AdminDashboard() {
           )}
         </div>
 
-        {/* DELETE CONFIRM MODAL */}
-        {deleteTargetId && (
-          <div className="modal-overlay" id="deleteModal" style={{ display: "flex" }}>
-            <div className="modal-box">
-              <div className="modal-icon">
-                <i className="fas fa-exclamation-triangle"></i>
-              </div>
-              <h3>Delete Project?</h3>
-              <p>This action cannot be undone. The project and all its images will be permanently removed.</p>
-              <div className="modal-actions">
-                <button className="btn-danger" id="confirmDeleteBtn" onClick={handleDeleteProject}>
-                  <i className="fas fa-trash"></i> Yes, Delete
-                </button>
-                <button className="btn-cancel" id="cancelDeleteBtn" onClick={() => setDeleteTargetId(null)}>
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* EDIT PROJECT MODAL */}
         {editProjModal && (

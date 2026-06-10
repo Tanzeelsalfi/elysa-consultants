@@ -523,11 +523,6 @@
   const adminProjList  = document.getElementById('adminProjectsList');
   const adminProjLoad  = document.getElementById('adminProjectsLoading');
   const adminProjEmpty = document.getElementById('adminProjectsEmpty');
-  const deleteModal    = document.getElementById('deleteModal');
-  const confirmDel     = document.getElementById('confirmDeleteBtn');
-  const cancelDel      = document.getElementById('cancelDeleteBtn');
-
-  let deleteTargetId = null;
 
   // Edit Project Elements and State
   const editModal      = document.getElementById('editModal');
@@ -829,8 +824,24 @@
         </div>
       `;
       item.querySelector('.btn-delete').addEventListener('click', () => {
-        deleteTargetId = proj._id;
-        deleteModal.style.display = 'flex';
+        showCustomConfirm(
+          'Delete Project',
+          `Permanently delete "${proj.title}"? The project and all its images will be removed.`,
+          async () => {
+            try {
+              const res = await fetch(`/api/admin/projects/${proj._id}`, {
+                method: 'DELETE',
+                credentials: 'include'
+              });
+              if (res.ok) {
+                loadAdminProjects();
+                showToast('Project deleted — frontend will refresh automatically', 'danger');
+              }
+            } catch {
+              showToast('Network error. Failed to delete project.', 'danger');
+            }
+          }
+        );
       });
       item.querySelector('.btn-edit-proj').addEventListener('click', () => {
         openEditModal(proj);
@@ -839,32 +850,6 @@
     });
   }
 
-  // Delete modal
-  if (confirmDel) {
-    confirmDel.addEventListener('click', async () => {
-      if (!deleteTargetId) return;
-      try {
-        const res = await fetch(`/api/admin/projects/${deleteTargetId}`, {
-          method: 'DELETE',
-          credentials: 'include'
-        });
-        deleteModal.style.display = 'none';
-        deleteTargetId = null;
-        if (res.ok) {
-          loadAdminProjects();
-          showToast('Project deleted — frontend will refresh automatically', 'danger');
-        }
-      } catch {
-        deleteModal.style.display = 'none';
-      }
-    });
-  }
-  if (cancelDel) {
-    cancelDel.addEventListener('click', () => {
-      deleteModal.style.display = 'none';
-      deleteTargetId = null;
-    });
-  }
 
   // ════════════════════════════════════════════
   // LEADS
