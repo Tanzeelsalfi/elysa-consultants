@@ -121,6 +121,17 @@ export default function AdminDashboard() {
   const [editCareerFeedback, setEditCareerFeedback] = useState("");
   const [editCareerSubmitting, setEditCareerSubmitting] = useState(false);
 
+  // Custom delete confirm modal
+  const [pendingDelete, setPendingDelete] = useState<{
+    title: string;
+    message: string;
+    action: () => Promise<void>;
+  } | null>(null);
+
+  const showDeleteConfirm = (title: string, message: string, action: () => Promise<void>) => {
+    setPendingDelete({ title, message, action });
+  };
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editFileInputRef = useRef<HTMLInputElement>(null);
   const empPhotoRef = useRef<HTMLInputElement>(null);
@@ -429,23 +440,20 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteEmployee = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete ${name}?`)) return;
-
-    try {
-      const res = await fetch(`/api/admin/employees/${id}`, {
-        method: "DELETE",
-      });
-
-      if (res.ok) {
-        showToast("Team member deleted successfully", "danger");
-        loadTeam();
-      } else {
-        showToast("Failed to delete team member", "danger");
+  const handleDeleteEmployee = (id: string, name: string) => {
+    showDeleteConfirm(
+      "Delete Team Member",
+      `Are you sure you want to permanently delete "${name}" from the team?`,
+      async () => {
+        const res = await fetch(`/api/admin/employees/${id}`, { method: "DELETE" });
+        if (res.ok) {
+          showToast("Team member deleted successfully", "danger");
+          loadTeam();
+        } else {
+          showToast("Failed to delete team member", "danger");
+        }
       }
-    } catch {
-      showToast("Network error. Failed to delete team member.", "danger");
-    }
+    );
   };
 
   const openEditEmpModal = (member: TeamMember) => {
@@ -504,23 +512,20 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteLead = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this lead?")) return;
-
-    try {
-      const res = await fetch(`/api/admin/contacts/${id}`, {
-        method: "DELETE",
-      });
-
-      if (res.ok) {
-        showToast("Lead deleted successfully", "danger");
-        loadLeads();
-      } else {
-        showToast("Failed to delete lead", "danger");
+  const handleDeleteLead = (id: string, name?: string) => {
+    showDeleteConfirm(
+      "Delete Project Lead",
+      `Remove the lead from "${name || "this contact"}"? All associated contact details will be permanently erased.`,
+      async () => {
+        const res = await fetch(`/api/admin/contacts/${id}`, { method: "DELETE" });
+        if (res.ok) {
+          showToast("Lead deleted successfully", "danger");
+          loadLeads();
+        } else {
+          showToast("Failed to delete lead", "danger");
+        }
       }
-    } catch {
-      showToast("Network error. Failed to delete lead.", "danger");
-    }
+    );
   };
 
   // ── CAREERS CRUD ──────────────────────────────────────────
@@ -578,23 +583,20 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteCareer = async (id: string, title: string) => {
-    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
-
-    try {
-      const res = await fetch(`/api/admin/careers/${id}`, {
-        method: "DELETE",
-      });
-
-      if (res.ok) {
-        showToast("Career listing deleted", "danger");
-        loadCareers();
-      } else {
-        showToast("Failed to delete career", "danger");
+  const handleDeleteCareer = (id: string, title: string) => {
+    showDeleteConfirm(
+      "Delete Career Listing",
+      `Permanently remove the "${title}" position? All applicant-facing data will be deleted.`,
+      async () => {
+        const res = await fetch(`/api/admin/careers/${id}`, { method: "DELETE" });
+        if (res.ok) {
+          showToast("Career listing deleted", "danger");
+          loadCareers();
+        } else {
+          showToast("Failed to delete career", "danger");
+        }
       }
-    } catch {
-      showToast("Network error. Failed to delete career.", "danger");
-    }
+    );
   };
 
   const openEditCareerModal = (job: Career) => {
@@ -661,23 +663,20 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteReview = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this review?")) return;
-
-    try {
-      const res = await fetch(`/api/admin/reviews/${id}`, {
-        method: "DELETE",
-      });
-
-      if (res.ok) {
-        showToast("Review deleted successfully", "danger");
-        loadReviews();
-      } else {
-        showToast("Failed to delete review", "danger");
+  const handleDeleteReview = (id: string, name?: string) => {
+    showDeleteConfirm(
+      "Delete Review",
+      `Permanently remove the review by "${name || "this user"}"? This cannot be recovered.`,
+      async () => {
+        const res = await fetch(`/api/admin/reviews/${id}`, { method: "DELETE" });
+        if (res.ok) {
+          showToast("Review deleted successfully", "danger");
+          loadReviews();
+        } else {
+          showToast("Failed to delete review", "danger");
+        }
       }
-    } catch {
-      showToast("Network error. Failed to delete review.", "danger");
-    }
+    );
   };
 
   // Check auth load screen
@@ -1262,7 +1261,7 @@ export default function AdminDashboard() {
                               alignItems: "center",
                               gap: "6px",
                             }}
-                            onClick={() => handleDeleteLead(lead._id)}
+                            onClick={() => handleDeleteLead(lead._id, lead.name)}
                           >
                             <i className="fas fa-trash"></i> Delete Lead
                           </button>
@@ -1537,7 +1536,7 @@ export default function AdminDashboard() {
                               alignItems: "center",
                               gap: "6px",
                             }}
-                            onClick={() => handleDeleteReview(item._id)}
+                            onClick={() => handleDeleteReview(item._id, item.name)}
                           >
                             <i className="fas fa-trash"></i> Delete Review
                           </button>
@@ -1919,6 +1918,163 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
+
+      {/* CUSTOM DELETE CONFIRM MODAL */}
+      {pendingDelete && (
+        <div
+          style={{
+            position: "fixed", inset: 0,
+            background: "rgba(0,0,0,0.75)",
+            backdropFilter: "blur(6px)",
+            zIndex: 9000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "24px",
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget) setPendingDelete(null); }}
+        >
+          <div
+            style={{
+              background: "#141420",
+              border: "1px solid rgba(231,76,60,0.2)",
+              borderRadius: "16px",
+              maxWidth: "420px",
+              width: "100%",
+              overflow: "hidden",
+              boxShadow: "0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(231,76,60,0.08)",
+              animation: "scaleIn 0.22s cubic-bezier(0.34,1.56,0.64,1)",
+            }}
+          >
+            {/* Header */}
+            <div
+              style={{
+                background: "linear-gradient(135deg,rgba(231,76,60,0.12) 0%,rgba(192,57,43,0.06) 100%)",
+                borderBottom: "1px solid rgba(231,76,60,0.12)",
+                padding: "32px 32px 24px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "14px",
+              }}
+            >
+              <div
+                style={{
+                  width: 64, height: 64,
+                  borderRadius: "50%",
+                  background: "rgba(231,76,60,0.12)",
+                  border: "1px solid rgba(231,76,60,0.25)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "1.6rem",
+                  color: "#e74c3c",
+                  boxShadow: "0 0 0 6px rgba(231,76,60,0.07)",
+                }}
+              >
+                <i className="fas fa-trash-alt"></i>
+              </div>
+              <div style={{ fontSize: "1.15rem", fontWeight: 700, color: "#f0ede8", letterSpacing: "-0.01em" }}>
+                {pendingDelete.title}
+              </div>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: "20px 32px 12px", textAlign: "center" }}>
+              <p style={{ color: "#6b6b80", fontSize: "0.9rem", lineHeight: 1.6 }}>
+                {pendingDelete.message}
+              </p>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  marginTop: 14,
+                  fontSize: "0.78rem",
+                  color: "rgba(231,76,60,0.7)",
+                  background: "rgba(231,76,60,0.06)",
+                  border: "1px solid rgba(231,76,60,0.12)",
+                  borderRadius: 6,
+                  padding: "5px 10px",
+                }}
+              >
+                <i className="fas fa-exclamation-circle"></i>
+                This action cannot be undone
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div style={{ padding: "20px 32px 28px", display: "flex", gap: 12 }}>
+              <button
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  padding: "12px 20px",
+                  background: "#e74c3c",
+                  color: "white",
+                  border: "none",
+                  borderRadius: 10,
+                  fontSize: "0.9rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  fontFamily: "inherit",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.background = "#c0392b";
+                  (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)";
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 6px 20px rgba(231,76,60,0.4)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.background = "#e74c3c";
+                  (e.currentTarget as HTMLButtonElement).style.transform = "none";
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow = "none";
+                }}
+                onClick={async () => {
+                  const action = pendingDelete.action;
+                  setPendingDelete(null);
+                  try { await action(); } catch { showToast("Operation failed", "danger"); }
+                }}
+              >
+                <i className="fas fa-trash-alt"></i> Yes, Delete
+              </button>
+              <button
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  padding: "12px 20px",
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: 10,
+                  color: "#6b6b80",
+                  fontSize: "0.9rem",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  fontFamily: "inherit",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.color = "#f0ede8";
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.2)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.color = "#6b6b80";
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.08)";
+                }}
+                onClick={() => setPendingDelete(null)}
+              >
+                <i className="fas fa-times"></i> Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toast Notification Container */}
       {toast && (

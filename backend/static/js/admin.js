@@ -116,6 +116,44 @@
   const cancelEditEmpBtn      = document.getElementById('cancelEditEmpBtn');
   const editEmpFeedback       = document.getElementById('editEmpFeedback');
 
+  // ── CUSTOM CONFIRM MODAL ─────────────────────────────
+  const customConfirmModal  = document.getElementById('customConfirmModal');
+  const customConfirmTitle  = document.getElementById('customConfirmTitle');
+  const customConfirmMsg    = document.getElementById('customConfirmMsg');
+  const customConfirmOkBtn  = document.getElementById('customConfirmOk');
+  const customConfirmCancel = document.getElementById('customConfirmCancel');
+  let _confirmCallback = null;
+
+  function showCustomConfirm(title, message, onConfirm) {
+    if (customConfirmTitle) customConfirmTitle.textContent = title;
+    if (customConfirmMsg)   customConfirmMsg.textContent   = message;
+    _confirmCallback = onConfirm;
+    if (customConfirmModal) customConfirmModal.style.display = 'flex';
+  }
+
+  function closeCustomConfirm() {
+    if (customConfirmModal) customConfirmModal.style.display = 'none';
+    _confirmCallback = null;
+  }
+
+  if (customConfirmOkBtn) {
+    customConfirmOkBtn.addEventListener('click', () => {
+      const cb = _confirmCallback;
+      closeCustomConfirm();
+      if (cb) cb();
+    });
+  }
+  if (customConfirmCancel) {
+    customConfirmCancel.addEventListener('click', closeCustomConfirm);
+  }
+  // Close on overlay click
+  if (customConfirmModal) {
+    customConfirmModal.addEventListener('click', (e) => {
+      if (e.target === customConfirmModal) closeCustomConfirm();
+    });
+  }
+
+
   if (openAddEmpBtn) {
     openAddEmpBtn.addEventListener('click', () => {
       const isOpen = addEmployeeForm.style.display !== 'none';
@@ -252,22 +290,27 @@
       item.querySelector('.btn-edit-emp').addEventListener('click', () => {
         openEditEmployeeModal(member);
       });
-      item.querySelector('.btn-delete-emp').addEventListener('click', async () => {
-        if (!confirm(`Are you sure you want to delete ${member.name}?`)) return;
-        try {
-          const res = await fetch(`/api/admin/employees/${member._id}`, {
-            method: 'DELETE',
-            credentials: 'include'
-          });
-          if (res.ok) {
-            loadAdminTeam();
-            showToast('Team member deleted successfully', 'danger');
-          } else {
-            showToast('Failed to delete team member', 'danger');
+      item.querySelector('.btn-delete-emp').addEventListener('click', () => {
+        showCustomConfirm(
+          `Delete Team Member`,
+          `Are you sure you want to permanently delete "${member.name}" from the team?`,
+          async () => {
+            try {
+              const res = await fetch(`/api/admin/employees/${member._id}`, {
+                method: 'DELETE',
+                credentials: 'include'
+              });
+              if (res.ok) {
+                loadAdminTeam();
+                showToast('Team member deleted successfully', 'danger');
+              } else {
+                showToast('Failed to delete team member', 'danger');
+              }
+            } catch {
+              showToast('Network error', 'danger');
+            }
           }
-        } catch {
-          showToast('Network error', 'danger');
-        }
+        );
       });
       adminTeamList.appendChild(item);
     });
@@ -904,24 +947,27 @@
       // Add event listener to delete button
       const deleteBtn = card.querySelector('.btn-delete-msg');
       if (deleteBtn) {
-        deleteBtn.addEventListener('click', async () => {
-          if (!confirm('Are you sure you want to delete this lead?')) return;
-
-          try {
-            const res = await fetch(`/api/admin/contacts/${item._id}`, {
-              method: 'DELETE',
-              credentials: 'include'
-            });
-
-            if (res.ok) {
-              showToast('Lead deleted successfully', 'danger');
-              loadContacts();
-            } else {
-              showToast('Failed to delete lead', 'danger');
+        deleteBtn.addEventListener('click', () => {
+          showCustomConfirm(
+            'Delete Project Lead',
+            `Remove the lead from "${item.name}"? All associated contact details will be permanently erased.`,
+            async () => {
+              try {
+                const res = await fetch(`/api/admin/contacts/${item._id}`, {
+                  method: 'DELETE',
+                  credentials: 'include'
+                });
+                if (res.ok) {
+                  showToast('Lead deleted successfully', 'danger');
+                  loadContacts();
+                } else {
+                  showToast('Failed to delete lead', 'danger');
+                }
+              } catch {
+                showToast('Network error. Failed to delete.', 'danger');
+              }
             }
-          } catch {
-            showToast('Network error. Failed to delete.', 'danger');
-          }
+          );
         });
       }
 
@@ -1102,22 +1148,27 @@
       item.querySelector('.btn-edit-career').addEventListener('click', () => {
         openEditCareerModal(job);
       });
-      item.querySelector('.btn-delete-career').addEventListener('click', async () => {
-        if (!confirm(`Delete "${job.title}"? This cannot be undone.`)) return;
-        try {
-          const res = await fetch(`/api/admin/careers/${job._id}`, {
-            method: 'DELETE',
-            credentials: 'include'
-          });
-          if (res.ok) {
-            loadAdminCareers();
-            showToast('Career listing deleted', 'danger');
-          } else {
-            showToast('Failed to delete career', 'danger');
+      item.querySelector('.btn-delete-career').addEventListener('click', () => {
+        showCustomConfirm(
+          'Delete Career Listing',
+          `Permanently remove the "${job.title}" position? All applicant-facing data will be deleted.`,
+          async () => {
+            try {
+              const res = await fetch(`/api/admin/careers/${job._id}`, {
+                method: 'DELETE',
+                credentials: 'include'
+              });
+              if (res.ok) {
+                loadAdminCareers();
+                showToast('Career listing deleted', 'danger');
+              } else {
+                showToast('Failed to delete career', 'danger');
+              }
+            } catch {
+              showToast('Network error', 'danger');
+            }
           }
-        } catch {
-          showToast('Network error', 'danger');
-        }
+        );
       });
       adminCareersList.appendChild(item);
     });
@@ -1302,24 +1353,27 @@
 
       const deleteBtn = card.querySelector('.btn-delete-rev');
       if (deleteBtn) {
-        deleteBtn.addEventListener('click', async () => {
-          if (!confirm('Are you sure you want to delete this review?')) return;
-
-          try {
-            const res = await fetch(`/api/admin/reviews/${item._id}`, {
-              method: 'DELETE',
-              credentials: 'include'
-            });
-
-            if (res.ok) {
-              showToast('Review deleted successfully', 'danger');
-              loadReviews();
-            } else {
-              showToast('Failed to delete review', 'danger');
+        deleteBtn.addEventListener('click', () => {
+          showCustomConfirm(
+            'Delete Review',
+            `Permanently remove the review by "${item.name}"? This cannot be recovered.`,
+            async () => {
+              try {
+                const res = await fetch(`/api/admin/reviews/${item._id}`, {
+                  method: 'DELETE',
+                  credentials: 'include'
+                });
+                if (res.ok) {
+                  showToast('Review deleted successfully', 'danger');
+                  loadReviews();
+                } else {
+                  showToast('Failed to delete review', 'danger');
+                }
+              } catch {
+                showToast('Network error. Failed to delete.', 'danger');
+              }
             }
-          } catch {
-            showToast('Network error. Failed to delete.', 'danger');
-          }
+          );
         });
       }
 

@@ -533,6 +533,33 @@
       </div>
     </div>
 
+    <!-- CUSTOM CONFIRM MODAL -->
+    <div class="modal-overlay" id="customConfirmModal" style="display:none;">
+      <div class="modal-box">
+        <div class="confirm-modal-header">
+          <div class="confirm-modal-icon-wrap">
+            <i class="fas fa-trash-alt"></i>
+          </div>
+          <div class="confirm-modal-title" id="customConfirmTitle">Delete Item?</div>
+        </div>
+        <div class="confirm-modal-body">
+          <p class="confirm-modal-message" id="customConfirmMsg">Are you sure you want to delete this item?</p>
+          <span class="confirm-modal-warning">
+            <i class="fas fa-exclamation-circle"></i>
+            This action cannot be undone
+          </span>
+        </div>
+        <div class="confirm-modal-actions">
+          <button class="btn-confirm-delete" id="customConfirmOk">
+            <i class="fas fa-trash-alt"></i> Yes, Delete
+          </button>
+          <button class="btn-confirm-cancel" id="customConfirmCancel">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script src="/static/js/admin.js"></script>
