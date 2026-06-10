@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Employee from "@/models/Employee";
 import { verifyAdmin } from "@/lib/auth";
-import { uploadToCloudinary } from "@/lib/cloudinary";
 
 export async function GET(request: NextRequest) {
   try {
@@ -54,12 +53,15 @@ export async function POST(request: NextRequest) {
       }
 
       try {
-        const buffer = Buffer.from(await file.arrayBuffer());
-        photoUrl = await uploadToCloudinary(buffer, "team");
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const base64Data = buffer.toString("base64");
+        const mimeType = file.type || "image/jpeg";
+        photoUrl = `data:${mimeType};base64,${base64Data}`;
       } catch (uploadError: any) {
-        console.error("Cloudinary upload failure for team member:", uploadError);
+        console.error("Base64 upload failure for team member:", uploadError);
         return NextResponse.json(
-          { message: `Failed to upload photo: ${uploadError.message || ""}` },
+          { message: `Failed to process photo: ${uploadError.message || ""}` },
           { status: 500 }
         );
       }

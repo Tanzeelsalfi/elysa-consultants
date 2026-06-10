@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Employee from "@/models/Employee";
 import { verifyAdmin } from "@/lib/auth";
-import { uploadToCloudinary, deleteFromCloudinary } from "@/lib/cloudinary";
 import mongoose from "mongoose";
 
 export async function DELETE(
@@ -28,9 +27,8 @@ export async function DELETE(
     }
 
     // Delete photo from Cloudinary if set
-    if (employee.photo) {
-      await deleteFromCloudinary(employee.photo);
-    }
+    // Legacy system uses base64, so no external deletion needed
+    // if (employee.photo && employee.photo.startsWith("http")) { ... }
 
     await Employee.findByIdAndDelete(id);
 
@@ -82,15 +80,14 @@ export async function PUT(
         return NextResponse.json({ message: "Invalid file extension for photo" }, { status: 400 });
       }
       try {
-        // Remove old photo first
-        if (employee.photo) {
-          await deleteFromCloudinary(employee.photo);
-        }
-        const buffer = Buffer.from(await file.arrayBuffer());
-        updateData.photo = await uploadToCloudinary(buffer, "team");
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const base64Data = buffer.toString("base64");
+        const mimeType = file.type || "image/jpeg";
+        updateData.photo = `data:${mimeType};base64,${base64Data}`;
       } catch (uploadError: any) {
-        console.error("Cloudinary upload failure for team member edit:", uploadError);
-        return NextResponse.json({ message: `Failed to upload photo: ${uploadError.message || ""}` }, { status: 500 });
+        console.error("Base64 upload failure for team member edit:", uploadError);
+        return NextResponse.json({ message: `Failed to process photo: ${uploadError.message || ""}` }, { status: 500 });
       }
     }
 

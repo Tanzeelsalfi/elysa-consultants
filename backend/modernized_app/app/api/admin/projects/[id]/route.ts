@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Project from "@/models/Project";
 import { verifyAdmin } from "@/lib/auth";
-import { uploadToCloudinary, deleteFromCloudinary } from "@/lib/cloudinary";
 import mongoose from "mongoose";
 
 export async function PUT(
@@ -51,10 +50,9 @@ export async function PUT(
     const existingImages = project.images || [];
     
     // Purge images that were deleted by admin from Cloudinary
-    const removedImages = existingImages.filter((img) => !keepImages.includes(img));
-    for (const imgUrl of removedImages) {
-      await deleteFromCloudinary(imgUrl);
-    }
+    // Legacy system uses base64, so no external deletion needed
+    // const removedImages = existingImages.filter((img) => !keepImages.includes(img));
+    // for (const imgUrl of removedImages) { ... }
 
     const updatedImages = [...keepImages];
 
@@ -65,11 +63,14 @@ export async function PUT(
         const ext = file.name.split(".").pop()?.toLowerCase();
         if (ext && ["jpg", "jpeg", "png", "webp"].includes(ext)) {
           try {
-            const buffer = Buffer.from(await file.arrayBuffer());
-            const imageUrl = await uploadToCloudinary(buffer, "projects");
+            const arrayBuffer = await file.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            const base64Data = buffer.toString("base64");
+            const mimeType = file.type || "image/jpeg";
+            const imageUrl = `data:${mimeType};base64,${base64Data}`;
             updatedImages.push(imageUrl);
           } catch (uploadErr) {
-            console.error("Cloudinary upload failure inside PUT:", uploadErr);
+            console.error("Base64 upload failure inside PUT:", uploadErr);
           }
         }
       }
@@ -120,10 +121,9 @@ export async function DELETE(
     }
 
     // Delete all associated images from Cloudinary to prevent orphaned files
-    const images = project.images || [];
-    for (const imgUrl of images) {
-      await deleteFromCloudinary(imgUrl);
-    }
+    // Legacy system uses base64, so no external deletion needed
+    // const images = project.images || [];
+    // for (const imgUrl of images) { ... }
 
     await Project.findByIdAndDelete(id);
 
