@@ -1089,13 +1089,19 @@
           <div class="project-item-desc" style="margin-top:8px;">${escHtml(job.description || '')}</div>
           ${skills ? `<div style="margin-top:10px; font-size:0.82rem; color:#888;"><i class="fas fa-tools" style="color:#c9a84c;"></i> ${escHtml(skills)}</div>` : ''}
           ${postedDate ? `<div style="margin-top:6px; font-size:0.78rem; color:#666;"><i class="fas fa-calendar-alt"></i> Posted ${escHtml(postedDate)}</div>` : ''}
-          <div style="margin-top:14px;">
+          <div style="margin-top:14px; display:flex; gap:8px;">
+            <button class="btn-edit btn-edit-career" style="padding:6px 14px; font-size:0.82rem; background:var(--gold); color:#0a0a0f; border:none; border-radius:4px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+              <i class="fas fa-edit"></i> Edit
+            </button>
             <button class="btn-delete btn-delete-career" data-id="${job._id}" style="padding:6px 14px; font-size:0.82rem; margin-top:0;">
               <i class="fas fa-trash"></i> Delete
             </button>
           </div>
         </div>
       `;
+      item.querySelector('.btn-edit-career').addEventListener('click', () => {
+        openEditCareerModal(job);
+      });
       item.querySelector('.btn-delete-career').addEventListener('click', async () => {
         if (!confirm(`Delete "${job.title}"? This cannot be undone.`)) return;
         try {
@@ -1129,6 +1135,95 @@
     submitCareerBtn.innerHTML = loading
       ? '<i class="fas fa-spinner fa-spin"></i> Saving...'
       : '<i class="fas fa-save"></i> Save Career';
+  }
+
+  // ── EDIT CAREER MODAL ──────────────────────────
+  const editCareerModal    = document.getElementById('editCareerModal');
+  const editCareerForm     = document.getElementById('editCareerForm');
+  const editCareerId       = document.getElementById('edit-career-id');
+  const editCareerTitle    = document.getElementById('edit-career-title');
+  const editCareerType     = document.getElementById('edit-career-type');
+  const editCareerLocation = document.getElementById('edit-career-location');
+  const editCareerDesc     = document.getElementById('edit-career-desc');
+  const editCareerSkills   = document.getElementById('edit-career-skills');
+  const editCareerFeedback = document.getElementById('editCareerFeedback');
+  const saveEditCareerBtn  = document.getElementById('saveEditCareerBtn');
+  const cancelEditCareer   = document.getElementById('cancelEditCareerBtn');
+
+  function openEditCareerModal(job) {
+    editCareerId.value       = job._id;
+    editCareerTitle.value    = job.title || '';
+    editCareerType.value     = job.type  || 'full-time';
+    editCareerLocation.value = job.location || '';
+    editCareerDesc.value     = job.description || '';
+    // skills may be array from backend
+    const skillsArr = Array.isArray(job.skills) ? job.skills : (job.skills ? [job.skills] : []);
+    editCareerSkills.value   = skillsArr.join(', ');
+    setEditCareerFeedback('', '');
+    if (editCareerModal) editCareerModal.style.display = 'flex';
+  }
+
+  function setEditCareerFeedback(msg, type) {
+    if (!editCareerFeedback) return;
+    editCareerFeedback.textContent = msg;
+    editCareerFeedback.className   = `form-feedback${type ? ' ' + type : ''}`;
+  }
+
+  function setEditCareerSubmitLoading(loading) {
+    if (!saveEditCareerBtn) return;
+    saveEditCareerBtn.disabled = loading;
+    saveEditCareerBtn.innerHTML = loading
+      ? '<i class="fas fa-spinner fa-spin"></i> Saving...'
+      : '<i class="fas fa-save"></i> Save Changes';
+  }
+
+  if (cancelEditCareer) {
+    cancelEditCareer.addEventListener('click', () => {
+      if (editCareerModal) editCareerModal.style.display = 'none';
+    });
+  }
+
+  if (editCareerForm) {
+    editCareerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      setEditCareerFeedback('', '');
+
+      const title = editCareerTitle.value.trim();
+      const desc  = editCareerDesc.value.trim();
+      if (!title || !desc) {
+        setEditCareerFeedback('Title and description are required.', 'error');
+        return;
+      }
+
+      setEditCareerSubmitLoading(true);
+      try {
+        const id = editCareerId.value;
+        const res = await fetch(`/api/admin/careers/${id}`, {
+          method: 'PUT',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title,
+            description: desc,
+            skills: editCareerSkills.value.trim(),
+            location: editCareerLocation.value.trim(),
+            type: editCareerType.value
+          })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showToast('Career updated successfully', 'success');
+          if (editCareerModal) editCareerModal.style.display = 'none';
+          loadAdminCareers();
+        } else {
+          setEditCareerFeedback(data.message || 'Failed to update career.', 'error');
+        }
+      } catch {
+        setEditCareerFeedback('Network error. Please try again.', 'error');
+      } finally {
+        setEditCareerSubmitLoading(false);
+      }
+    });
   }
 
   // ════════════════════════════════════════════

@@ -569,6 +569,49 @@ def admin_add_career():
         return jsonify({"message": str(e)}), 500
 
 
+@admin_bp.route("/careers/<id>", methods=["PUT"])
+@require_admin
+def admin_edit_career(id):
+    try:
+        db = get_db()
+        career = db.careers.find_one({"_id": ObjectId(id)})
+        if not career:
+            return jsonify({"message": "Career not found"}), 404
+
+        data = request.get_json() or {}
+
+        title       = str(data.get("title", "")).strip()
+        description = str(data.get("description", "")).strip()
+        skills_raw  = data.get("skills", None)
+        location    = str(data.get("location", "")).strip()
+        job_type    = str(data.get("type", "")).strip().lower()
+
+        update_doc = {"updatedAt": datetime.datetime.utcnow()}
+
+        if title:
+            update_doc["title"] = title
+        if description:
+            update_doc["description"] = description
+        if skills_raw is not None:
+            if isinstance(skills_raw, str):
+                update_doc["skills"] = [s.strip() for s in skills_raw.split(",") if s.strip()]
+            else:
+                update_doc["skills"] = [str(s).strip() for s in skills_raw if str(s).strip()]
+        if location:
+            update_doc["location"] = location
+        if job_type:
+            update_doc["type"] = job_type
+
+        db.careers.update_one({"_id": ObjectId(id)}, {"$set": update_doc})
+
+        updated = db.careers.find_one({"_id": ObjectId(id)})
+        return jsonify(serialize_doc(updated)), 200
+
+    except Exception as e:
+        print("EDIT CAREER ERROR:", e)
+        return jsonify({"message": str(e)}), 500
+
+
 @admin_bp.route("/careers/<id>", methods=["DELETE"])
 @require_admin
 def admin_delete_career(id):

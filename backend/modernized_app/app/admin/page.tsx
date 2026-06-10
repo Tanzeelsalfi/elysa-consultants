@@ -107,9 +107,24 @@ export default function AdminDashboard() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
 
+  // Edit Team Member Modal
+  const [editEmpModal, setEditEmpModal] = useState<TeamMember | null>(null);
+  const [editEmpForm, setEditEmpForm] = useState({ name: "", position: "", spec: "" });
+  const [editEmpNewPhoto, setEditEmpNewPhoto] = useState<File | null>(null);
+  const [editEmpPreview, setEditEmpPreview] = useState("");
+  const [editEmpFeedback, setEditEmpFeedback] = useState("");
+  const [editEmpSubmitting, setEditEmpSubmitting] = useState(false);
+
+  // Edit Career Modal
+  const [editCareerModal, setEditCareerModal] = useState<Career | null>(null);
+  const [editCareerForm, setEditCareerForm] = useState({ title: "", description: "", skills: "", location: "", type: "full-time" });
+  const [editCareerFeedback, setEditCareerFeedback] = useState("");
+  const [editCareerSubmitting, setEditCareerSubmitting] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editFileInputRef = useRef<HTMLInputElement>(null);
   const empPhotoRef = useRef<HTMLInputElement>(null);
+  const editEmpPhotoRef = useRef<HTMLInputElement>(null);
 
   // Toast trigger helper
   const showToast = (msg: string, type: "success" | "danger" | "warning" = "success") => {
@@ -433,6 +448,46 @@ export default function AdminDashboard() {
     }
   };
 
+  const openEditEmpModal = (member: TeamMember) => {
+    setEditEmpModal(member);
+    setEditEmpForm({ name: member.name, position: member.position, spec: member.spec || "" });
+    setEditEmpNewPhoto(null);
+    setEditEmpPreview("");
+    setEditEmpFeedback("");
+  };
+
+  const handleEditEmployee = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEditEmpFeedback("");
+    if (!editEmpModal) return;
+
+    setEditEmpSubmitting(true);
+    const formData = new FormData();
+    formData.append("name", editEmpForm.name);
+    formData.append("position", editEmpForm.position);
+    formData.append("spec", editEmpForm.spec);
+    if (editEmpNewPhoto) formData.append("photo", editEmpNewPhoto);
+
+    try {
+      const res = await fetch(`/api/admin/employees/${editEmpModal._id}`, {
+        method: "PUT",
+        body: formData,
+      });
+      if (res.ok) {
+        showToast("Team member updated successfully", "success");
+        setEditEmpModal(null);
+        loadTeam();
+      } else {
+        const data = await res.json();
+        setEditEmpFeedback(data.message || "Failed to update team member.");
+      }
+    } catch {
+      setEditEmpFeedback("Network error. Please try again.");
+    } finally {
+      setEditEmpSubmitting(false);
+    }
+  };
+
   // ── LEADS ──────────────────────────────────────────────────
   const loadLeads = async () => {
     setLeadsLoading(true);
@@ -539,6 +594,54 @@ export default function AdminDashboard() {
       }
     } catch {
       showToast("Network error. Failed to delete career.", "danger");
+    }
+  };
+
+  const openEditCareerModal = (job: Career) => {
+    setEditCareerModal(job);
+    const skillsArr = Array.isArray(job.skills)
+      ? (job.skills as unknown as string[]).join(", ")
+      : (job.skills || "");
+    setEditCareerForm({
+      title: job.title,
+      description: job.description,
+      skills: skillsArr,
+      location: job.location || "",
+      type: job.type || "full-time",
+    });
+    setEditCareerFeedback("");
+  };
+
+  const handleEditCareer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEditCareerFeedback("");
+    if (!editCareerModal) return;
+
+    setEditCareerSubmitting(true);
+    try {
+      const res = await fetch(`/api/admin/careers/${editCareerModal._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: editCareerForm.title,
+          description: editCareerForm.description,
+          skills: editCareerForm.skills,
+          location: editCareerForm.location,
+          type: editCareerForm.type,
+        }),
+      });
+      if (res.ok) {
+        showToast("Career updated successfully", "success");
+        setEditCareerModal(null);
+        loadCareers();
+      } else {
+        const data = await res.json();
+        setEditCareerFeedback(data.message || "Failed to update career.");
+      }
+    } catch {
+      setEditCareerFeedback("Network error. Please try again.");
+    } finally {
+      setEditCareerSubmitting(false);
     }
   };
 
@@ -1055,13 +1158,35 @@ export default function AdminDashboard() {
                         <div className="project-item-category">{member.spec || "Staff"}</div>
                         <div className="project-item-title">{member.name}</div>
                         <div className="project-item-desc">{member.position}</div>
+                    <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
+                        <button
+                          className="btn-edit btn-primary-admin"
+                          style={{
+                            padding: "6px 12px",
+                            fontSize: "0.82rem",
+                            background: "#c9a84c",
+                            color: "#0a0a0f",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            fontWeight: 600,
+                            marginTop: 0,
+                          }}
+                          onClick={() => openEditEmpModal(member)}
+                        >
+                          <i className="fas fa-edit"></i> Edit
+                        </button>
                         <button
                           className="btn-delete"
-                          style={{ marginTop: "10px" }}
+                          style={{ marginTop: 0, padding: "6px 12px", fontSize: "0.82rem" }}
                           onClick={() => handleDeleteEmployee(member._id, member.name)}
                         >
                           <i className="fas fa-trash"></i> Delete
                         </button>
+                      </div>
                       </div>
                     </div>
                   ))}
@@ -1304,7 +1429,27 @@ export default function AdminDashboard() {
                               Posted {postedDate}
                             </div>
                           )}
-                          <div style={{ marginTop: "14px" }}>
+                          <div style={{ marginTop: "14px", display: "flex", gap: "8px" }}>
+                            <button
+                              className="btn-edit btn-primary-admin"
+                              style={{
+                                padding: "6px 14px",
+                                fontSize: "0.82rem",
+                                background: "#c9a84c",
+                                color: "#0a0a0f",
+                                border: "none",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                fontWeight: 600,
+                                marginTop: 0,
+                              }}
+                              onClick={() => openEditCareerModal(job)}
+                            >
+                              <i className="fas fa-edit"></i> Edit
+                            </button>
                             <button
                               className="btn-delete"
                               style={{ padding: "6px 14px", fontSize: "0.82rem", marginTop: 0 }}
@@ -1592,6 +1737,183 @@ export default function AdminDashboard() {
                     {editFeedback}
                   </div>
                 )}
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* EDIT TEAM MEMBER MODAL */}
+        {editEmpModal && (
+          <div className="modal-overlay" id="editEmployeeModal" style={{ display: "flex" }}>
+            <div className="modal-box" style={{ maxWidth: "500px", textAlign: "left" }}>
+              <h3><i className="fas fa-user-edit"></i> Edit Team Member</h3>
+              <form onSubmit={handleEditEmployee} noValidate style={{ marginTop: "15px" }}>
+                <div className="form-group">
+                  <label htmlFor="edit-emp-name">Full Name <span className="required">*</span></label>
+                  <input
+                    type="text"
+                    id="edit-emp-name"
+                    value={editEmpForm.name}
+                    onChange={(e) => setEditEmpForm((p) => ({ ...p, name: e.target.value }))}
+                    required
+                    maxLength={100}
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="edit-emp-position">Position <span className="required">*</span></label>
+                  <input
+                    type="text"
+                    id="edit-emp-position"
+                    value={editEmpForm.position}
+                    onChange={(e) => setEditEmpForm((p) => ({ ...p, position: e.target.value }))}
+                    required
+                    maxLength={100}
+                    placeholder="e.g. Senior Civil Engineer"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="edit-emp-spec">Specialty / Subtitle</label>
+                  <input
+                    type="text"
+                    id="edit-emp-spec"
+                    value={editEmpForm.spec}
+                    onChange={(e) => setEditEmpForm((p) => ({ ...p, spec: e.target.value }))}
+                    maxLength={100}
+                    placeholder="e.g. Structural Design Specialist"
+                  />
+                </div>
+                {/* Current photo preview */}
+                {editEmpModal.photo && !editEmpPreview && (
+                  <div className="form-group">
+                    <label>Current Photo</label>
+                    <div style={{ maxWidth: 100, borderRadius: 6, overflow: "hidden", border: "1px solid #333" }}>
+                      <img src={editEmpModal.photo} alt="Current" style={{ width: "100%", display: "block" }} />
+                    </div>
+                  </div>
+                )}
+                <div className="form-group">
+                  <label>Upload New Photo</label>
+                  <input
+                    type="file"
+                    ref={editEmpPhotoRef}
+                    accept=".jpg,.jpeg,.png,.webp"
+                    style={{ display: "none" }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setEditEmpNewPhoto(file);
+                        const reader = new FileReader();
+                        reader.onload = (ev) => setEditEmpPreview(ev.target?.result as string);
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="btn-add"
+                    onClick={() => editEmpPhotoRef.current?.click()}
+                    style={{ display: "inline-block", background: "#14141f", color: "#aaa", padding: "8px 16px" }}
+                  >
+                    Choose New Photo
+                  </button>
+                  {editEmpPreview && (
+                    <div className="image-previews" style={{ marginTop: 8 }}>
+                      <div className="preview-item">
+                        <img src={editEmpPreview} alt="New Preview" />
+                        <button
+                          type="button"
+                          className="preview-remove"
+                          onClick={() => { setEditEmpNewPhoto(null); setEditEmpPreview(""); }}
+                        >
+                          <i className="fas fa-times"></i>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="form-actions" style={{ marginTop: 24, display: "flex", justifyContent: "flex-end", gap: 10 }}>
+                  <button type="submit" className="btn-primary-admin" id="saveEditEmpBtn" style={{ padding: "10px 20px" }} disabled={editEmpSubmitting}>
+                    {editEmpSubmitting ? <><i className="fas fa-spinner fa-spin"></i> Saving...</> : <><i className="fas fa-save"></i> Save Changes</>}
+                  </button>
+                  <button type="button" className="btn-cancel" style={{ padding: "10px 20px" }} onClick={() => setEditEmpModal(null)}>Cancel</button>
+                </div>
+                {editEmpFeedback && <div className="form-feedback error" style={{ display: "block" }}>{editEmpFeedback}</div>}
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* EDIT CAREER MODAL */}
+        {editCareerModal && (
+          <div className="modal-overlay" id="editCareerModal" style={{ display: "flex" }}>
+            <div className="modal-box" style={{ maxWidth: "560px", textAlign: "left" }}>
+              <h3><i className="fas fa-briefcase"></i> Edit Career Listing</h3>
+              <form onSubmit={handleEditCareer} noValidate style={{ marginTop: "15px" }}>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="edit-career-title">Job Title <span className="required">*</span></label>
+                    <input
+                      type="text"
+                      id="edit-career-title"
+                      value={editCareerForm.title}
+                      onChange={(e) => setEditCareerForm((p) => ({ ...p, title: e.target.value }))}
+                      required
+                      maxLength={200}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="edit-career-type">Job Type</label>
+                    <select
+                      id="edit-career-type"
+                      value={editCareerForm.type}
+                      onChange={(e) => setEditCareerForm((p) => ({ ...p, type: e.target.value }))}
+                    >
+                      <option value="full-time">Full-Time</option>
+                      <option value="part-time">Part-Time</option>
+                      <option value="contract">Contract</option>
+                      <option value="internship">Internship</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="edit-career-location">Location</label>
+                  <input
+                    type="text"
+                    id="edit-career-location"
+                    value={editCareerForm.location}
+                    onChange={(e) => setEditCareerForm((p) => ({ ...p, location: e.target.value }))}
+                    maxLength={100}
+                    placeholder="e.g. Kashmir, India"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="edit-career-desc">Job Description <span className="required">*</span></label>
+                  <textarea
+                    id="edit-career-desc"
+                    value={editCareerForm.description}
+                    onChange={(e) => setEditCareerForm((p) => ({ ...p, description: e.target.value }))}
+                    rows={4}
+                    required
+                    maxLength={2000}
+                  ></textarea>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="edit-career-skills">Required Skills (comma separated)</label>
+                  <input
+                    type="text"
+                    id="edit-career-skills"
+                    value={editCareerForm.skills}
+                    onChange={(e) => setEditCareerForm((p) => ({ ...p, skills: e.target.value }))}
+                    placeholder="e.g. AutoCAD, Revit, ETABS"
+                  />
+                </div>
+                <div className="form-actions" style={{ marginTop: 24, display: "flex", justifyContent: "flex-end", gap: 10 }}>
+                  <button type="submit" className="btn-primary-admin" id="saveEditCareerBtn" style={{ padding: "10px 20px" }} disabled={editCareerSubmitting}>
+                    {editCareerSubmitting ? <><i className="fas fa-spinner fa-spin"></i> Saving...</> : <><i className="fas fa-save"></i> Save Changes</>}
+                  </button>
+                  <button type="button" className="btn-cancel" style={{ padding: "10px 20px" }} onClick={() => setEditCareerModal(null)}>Cancel</button>
+                </div>
+                {editCareerFeedback && <div className="form-feedback error" style={{ display: "block" }}>{editCareerFeedback}</div>}
               </form>
             </div>
           </div>
