@@ -1450,6 +1450,11 @@ h3 { font-size: clamp(1.2rem, 2vw, 1.6rem); }
 .footer-bottom p { color: var(--text-faint); font-size: 0.85rem; }
 .footer-tagline { color: var(--gold); font-style: italic; }
 
+.footer-credits { margin-top: 10px; font-size: 0.8rem; color: var(--text-faint); }
+.footer-credits a { color: var(--gold); text-decoration: none; font-weight: 500; transition: color 0.3s; }
+.footer-credits a:hover { color: #ffe066; text-decoration: underline; }
+.credits-roles { display: block; font-size: 0.75rem; opacity: 0.7; margin-top: 2px; }
+
 /* ── ANIMATIONS ─────────────────────────────────────────────── */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(30px); }
