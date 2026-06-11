@@ -99,6 +99,10 @@ export default function Footer() {
       <div className="footer-bottom">
         <p>&copy; {new Date().getFullYear()} Elysa Consultants. All Rights Reserved.</p>
         <p className="footer-tagline">Engineering Tomorrow's Landmarks</p>
+        <div className="footer-credits">
+          <p>Developed & Engineered by <a href="mailto:aakhoonrashiq@gmail.com">Rashiq Ashfaq</a> & Tanzeel Salfi</p>
+          <span className="credits-roles">AI/ML Engineers & Web Developers</span>
+        </div>
       </div>
     </footer>
   );
