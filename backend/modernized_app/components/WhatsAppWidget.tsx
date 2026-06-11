@@ -65,13 +65,13 @@ export default function WhatsAppWidget() {
 
   return (
     <div
-      className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 font-sans flex flex-col items-center transition-all duration-1000 transform ${
-        isVisible ? "opacity-100" : "opacity-0 translate-y-12 pointer-events-none"
+      className={`fixed top-1/2 right-6 -translate-y-1/2 z-50 font-sans flex flex-col items-end transition-all duration-1000 transform ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12 pointer-events-none"
       }`}
     >
       {/* CHAT CARD */}
       <div
-        className={`mb-4 w-80 rounded-2xl shadow-2xl transition-all duration-300 transform origin-bottom ${
+        className={`mb-4 w-80 rounded-2xl shadow-2xl transition-all duration-300 transform origin-bottom-right ${
           isOpen
             ? "scale-100 opacity-100 translate-y-0"
             : "scale-75 opacity-0 translate-y-4 pointer-events-none"
@@ -172,11 +172,11 @@ export default function WhatsAppWidget() {
       </div>
 
       {/* TRIGGER CONTAINER WITH TOOLTIP */}
-      <div className="flex flex-col items-center group cursor-pointer relative">
+      <div className="flex items-center group cursor-pointer">
         {/* Sleek Glassmorphic Tooltip */}
         {!isOpen && (
           <div
-            className="absolute -top-12 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 pointer-events-none transition-all duration-300 py-2 px-3.5 rounded-xl text-xs text-white font-medium tracking-wide whitespace-nowrap"
+            className="opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 pointer-events-none transition-all duration-300 mr-3.5 py-2 px-3.5 rounded-xl text-xs text-white font-medium tracking-wide whitespace-nowrap"
             style={{
               background: "rgba(18, 18, 24, 0.75)",
               backdropFilter: "blur(12px)",
