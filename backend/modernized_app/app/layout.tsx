@@ -33,8 +33,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
+    <html lang="en" className={`${playfair.variable} ${inter.variable}`} suppressHydrationWarning>
       <head>
+        {/* Forcefully hide the Next.js Development Indicator (the N popup) */}
+        <style dangerouslySetInnerHTML={{ __html: `nextjs-portal { display: none !important; }` }} />
+        
         {/* Load FontAwesome Icons */}
         <link
           rel="stylesheet"
