@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
         sub: username,
       },
       JWT_SECRET,
-      { expiresIn: "8h" }
+      { expiresIn: "7d" }
     );
 
     const response = NextResponse.json(
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 8 * 60 * 60, // 8 hours
+      maxAge: 7 * 24 * 60 * 60, // 7 days
       path: "/",
     });
 

@@ -100,7 +100,7 @@ def admin_login():
                 "role": "admin",
                 "sub": username,
                 "iat": datetime.datetime.utcnow(),
-                "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=8),
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(days=7),
             },
             secret,
             algorithm="HS256",
@@ -117,7 +117,7 @@ def admin_login():
             httponly=True,
             secure=False,      # Set to True in production (HTTPS)
             samesite="Strict",
-            max_age=8 * 60 * 60,
+            max_age=7 * 24 * 3600  # 7 days
         )
         return response, 200
 
