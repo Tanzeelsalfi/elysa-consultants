@@ -105,7 +105,7 @@ export default function WhatsAppWidget() {
               </div>
               <span
                 className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[#121218] ${
-                  isOnline ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+                  isOnline ? "bg-emerald-500 animate-pulse" : "bg-yellow-400"
                 }`}
               ></span>
             </div>
@@ -114,7 +114,7 @@ export default function WhatsAppWidget() {
               <p className="text-xs text-gray-300 flex items-center gap-1.5 mt-0.5">
                 <span
                   className={`w-1.5 h-1.5 rounded-full ${
-                    isOnline ? "bg-emerald-500" : "bg-amber-500"
+                    isOnline ? "bg-emerald-500" : "bg-yellow-400"
                   }`}
                 ></span>
                 {isOnline ? "Online — Chat with an Engineer" : "Away — Leave a message"}
@@ -158,11 +158,11 @@ export default function WhatsAppWidget() {
             style={{
               background: isOnline
                 ? "linear-gradient(135deg, #25D366 0%, #128C7E 100%)"
-                : "linear-gradient(135deg, #c9a84c 0%, #a07d2c 100%)",
+                : "linear-gradient(135deg, #FBBF24 0%, #D97706 100%)",
               color: "#ffffff",
               boxShadow: isOnline
                 ? "0 4px 15px rgba(37, 211, 102, 0.25)"
-                : "0 4px 15px rgba(201, 168, 76, 0.25)",
+                : "0 4px 15px rgba(251, 191, 36, 0.25)",
             }}
           >
             <i className="fab fa-whatsapp text-lg"></i>
@@ -189,46 +189,37 @@ export default function WhatsAppWidget() {
           </div>
         )}
 
-        {/* FLOATING ACTION TRIGGER */}
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="w-14 h-14 rounded-full flex items-center justify-center shadow-2xl relative transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none"
           aria-label="Contact us on WhatsApp"
           style={{
-            background: "rgba(18, 18, 24, 0.75)",
-            backdropFilter: "blur(15px)",
-            WebkitBackdropFilter: "blur(15px)",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
-            boxShadow: "0 10px 30px rgba(0, 0, 0, 0.3)",
+            background: isOnline ? "#25D366" : "#FBBF24",
+            boxShadow: isOnline ? "0 10px 30px rgba(37, 211, 102, 0.4)" : "0 10px 30px rgba(251, 191, 36, 0.4)",
           }}
         >
           {/* Pulsing indicator ring */}
           <span
-            className={`absolute -inset-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-ping -z-10 ${
-              isOnline ? "bg-emerald-500/20" : "bg-[#c9a84c]/20"
-            }`}
+            className="absolute -inset-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-ping -z-10 bg-white/40"
             style={{ animationDuration: "2s" }}
           ></span>
 
           {/* Dynamic status colored ring */}
           <span
             className={`absolute -inset-0.5 rounded-full border-2 -z-10 ${
-              isOnline ? "border-emerald-500/30" : "border-[#c9a84c]/30"
+              isOnline ? "border-[#25D366]/30" : "border-[#FBBF24]/30"
             }`}
           ></span>
 
           {/* WhatsApp Icon */}
           <i
-            className="fab fa-whatsapp text-2xl transition-all duration-300"
-            style={{
-              color: isOnline ? "#25D366" : "#c9a84c",
-            }}
+            className="fab fa-whatsapp text-3xl text-white transition-all duration-300"
           ></i>
 
           {/* Pulsing Dot indicator */}
           <span
-            className={`absolute top-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-[#121218] ${
-              isOnline ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+            className={`absolute top-0 right-0 w-3.5 h-3.5 rounded-full border-2 ${
+              isOnline ? "border-[#25D366] bg-emerald-100 animate-pulse" : "border-[#FBBF24] bg-yellow-100"
             }`}
           ></span>
         </button>
