@@ -17,18 +17,32 @@ export default function WhatsAppWidget() {
   // Determine if it is business hours in Kashmir/IST (UTC+5:30)
   // Monday - Saturday, 9:00 AM - 6:00 PM IST
   const checkBusinessStatus = () => {
-    const now = new Date();
-    // Convert client time to UTC, then add 5.5 hours for IST
-    const utcEpoch = now.getTime() + now.getTimezoneOffset() * 60000;
-    const istDate = new Date(utcEpoch + 3600000 * 5.5);
+    try {
+      const now = new Date();
+      const hourFormatter = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Kolkata",
+        hour12: false,
+        hour: "numeric",
+      });
+      const hour = parseInt(hourFormatter.format(now), 10);
 
-    const day = istDate.getUTCDay(); // 0 = Sunday, 1-6 = Mon-Sat
-    const hours = istDate.getUTCHours(); // 0-23
+      const weekdayFormatter = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Kolkata",
+        weekday: "short",
+      });
+      const weekday = weekdayFormatter.format(now);
 
-    const isWorkDay = day >= 1 && day <= 6;
-    const isWorkHour = hours >= 9 && hours < 18;
+      const workDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const isWorkDay = workDays.includes(weekday);
+      const isWorkHour = hour >= 9 && hour < 18;
 
-    return isWorkDay && isWorkHour;
+      return isWorkDay && isWorkHour;
+    } catch (e) {
+      const now = new Date();
+      const day = now.getDay();
+      const hours = now.getHours();
+      return day >= 1 && day <= 6 && hours >= 9 && hours < 18;
+    }
   };
 
   useEffect(() => {
