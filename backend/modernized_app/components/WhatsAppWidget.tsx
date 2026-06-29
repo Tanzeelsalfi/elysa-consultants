@@ -65,13 +65,13 @@ export default function WhatsAppWidget() {
 
   return (
     <div
-      className={`fixed bottom-24 left-6 z-50 font-sans flex flex-col items-start transition-all duration-1000 transform ${
+      className={`fixed bottom-24 right-6 z-50 font-sans flex flex-col items-end transition-all duration-1000 transform ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12 pointer-events-none"
       }`}
     >
       {/* CHAT CARD */}
       <div
-        className={`mb-4 w-80 rounded-2xl shadow-2xl transition-all duration-300 transform origin-bottom-left ${
+        className={`mb-4 w-80 rounded-2xl shadow-2xl transition-all duration-300 transform origin-bottom-right ${
           isOpen
             ? "scale-100 opacity-100 translate-y-0"
             : "scale-75 opacity-0 translate-y-4 pointer-events-none"
@@ -173,6 +173,22 @@ export default function WhatsAppWidget() {
 
       {/* TRIGGER CONTAINER WITH TOOLTIP */}
       <div className="flex items-center group cursor-pointer">
+        {/* Sleek Glassmorphic Tooltip */}
+        {!isOpen && (
+          <div
+            className="opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 pointer-events-none transition-all duration-300 mr-3.5 py-2 px-3.5 rounded-xl text-xs text-white font-medium tracking-wide whitespace-nowrap"
+            style={{
+              background: "rgba(18, 18, 24, 0.75)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.25)",
+            }}
+          >
+            Need structural advice? Chat with us!
+          </div>
+        )}
+
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="w-14 h-14 rounded-full flex items-center justify-center shadow-2xl relative transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none"
@@ -207,22 +223,6 @@ export default function WhatsAppWidget() {
             }`}
           ></span>
         </button>
-
-        {/* Sleek Glassmorphic Tooltip */}
-        {!isOpen && (
-          <div
-            className="opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 pointer-events-none transition-all duration-300 ml-3.5 py-2 px-3.5 rounded-xl text-xs text-white font-medium tracking-wide whitespace-nowrap"
-            style={{
-              background: "rgba(18, 18, 24, 0.75)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
-              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.25)",
-            }}
-          >
-            Need structural advice? Chat with us!
-          </div>
-        )}
       </div>
     </div>
   );
