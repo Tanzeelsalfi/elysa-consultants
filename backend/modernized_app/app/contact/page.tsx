@@ -204,7 +204,7 @@ export default function Contact() {
                 </div>
                 <div className="info-text">
                   <h4>Email</h4>
-                  <a href="mailto:aakhoonrashiq@gmail.com">aakhoonrashiq@gmail.com</a>
+                  <a href="mailto:elyasaconsultants@gmail.com">elyasaconsultants@gmail.com</a>
                 </div>
               </div>
 

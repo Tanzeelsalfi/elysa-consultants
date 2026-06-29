@@ -43,7 +43,7 @@ export default function Footer() {
             <a href="tel:+917006375455" aria-label="Call us" className="social-icon">
               <i className="fas fa-phone"></i>
             </a>
-            <a href="mailto:aakhoonrashiq@gmail.com" aria-label="Email us" className="social-icon">
+            <a href="mailto:elyasaconsultants@gmail.com" aria-label="Email us" className="social-icon">
               <i className="fas fa-envelope"></i>
             </a>
           </div>
@@ -87,7 +87,7 @@ export default function Footer() {
           </div>
           <div className="contact-item">
             <i className="fas fa-envelope"></i>
-            <a href="mailto:aakhoonrashiq@gmail.com">aakhoonrashiq@gmail.com</a>
+            <a href="mailto:elyasaconsultants@gmail.com">elyasaconsultants@gmail.com</a>
           </div>
           <div className="contact-item">
             <i className="fas fa-clock"></i>

@@ -34,7 +34,7 @@ def send_email_sync(subject, html_body, reply_to=None, from_name="Elysa Website"
         # Resend Free Tier uses onboarding@resend.dev. To send from your own domain,
         # you verify it on Resend dashboard and specify it via RESEND_FROM_EMAIL.
         from_email = os.getenv("RESEND_FROM_EMAIL", "onboarding@resend.dev")
-        to_email = email_user if email_user else "aakhoonrashiq@gmail.com"
+        to_email = email_user if email_user else "elyasaconsultants@gmail.com"
         
         payload = {
             "from": f"{from_name} <{from_email}>",

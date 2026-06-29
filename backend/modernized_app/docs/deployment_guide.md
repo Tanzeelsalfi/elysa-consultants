@@ -49,8 +49,8 @@ Add the following keys in the Vercel **Environment Variables** panel:
 | `MONGO_URI` | MongoDB Atlas URI string | `mongodb+srv://admin:pwd@cluster0...` |
 | `ADMIN_USERS` | Credentials for dashboard | `admin:password123,aakhoon:Rashiq@2026` |
 | `JWT_SECRET` | Secret token to encrypt sessions | `generate_some_long_random_hash` |
-| `EMAIL_USER` | Admin email address | `aakhoonrashiq@gmail.com` |
-| `EMAIL_PASS` | Gmail App Password (16 characters) | `ynpjxpwhvslvxeog` |
+| `EMAIL_USER` | Admin email address | `elyasaconsultants@gmail.com` |
+| `EMAIL_PASS` | Gmail App Password (16 characters) | `gcruaveknacapoju` |
 | `CLOUDINARY_CLOUD_NAME` | Cloudinary name | `your-cloud-name` |
 | `CLOUDINARY_API_KEY` | Cloudinary API Key | `123456789012345` |
 | `CLOUDINARY_API_SECRET` | Cloudinary API Secret | `your-api-secret-key` |
