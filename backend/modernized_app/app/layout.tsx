@@ -21,9 +21,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Elysa Consultants — Premier Engineering & Architecture in Kashmir",
+  title: "Elysa Consultants — Premier Engineering & Architecture Services",
   description:
-    "Elysa Consultants provides professional civil, structural, and architectural engineering consulting services across Kashmir and India since 2017.",
+    "Elysa Consultants provides professional civil, structural, and architectural engineering consulting services across the Indian subcontinent since 2017.",
   robots: "index, follow",
 };
 

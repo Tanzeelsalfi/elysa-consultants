@@ -63,7 +63,7 @@ export default function About() {
             </h2>
 
             <p>
-              Elysa Consultants is a Kashmir-based civil, structural, and architectural engineering consultancy firm
+              Elysa Consultants is a premier civil, structural, and architectural engineering consultancy firm
               established in 2017.
             </p>
 
@@ -75,7 +75,7 @@ export default function About() {
             <p>
               With an experienced team of engineers and designers, we have successfully delivered projects including
               shopping malls, schools, hotels, residential buildings, water infrastructure, and institutional projects
-              across Kashmir and other regions of India.
+              across the Indian subcontinent.
             </p>
 
             <p>
@@ -148,7 +148,7 @@ export default function About() {
             <div className="timeline-year">2017</div>
             <div className="timeline-content">
               <h3>Founded</h3>
-              <p>Elysa Consultants was established in Kashmir with a vision to deliver world-class engineering solutions.</p>
+              <p>Elysa Consultants was established with a vision to deliver world-class engineering solutions.</p>
             </div>
           </div>
           <div className="timeline-item">
@@ -169,7 +169,7 @@ export default function About() {
             <div className="timeline-year">2024</div>
             <div className="timeline-content">
               <h3>500+ Projects Delivered</h3>
-              <p>Crossed a landmark of 500+ completed projects across Kashmir and India.</p>
+              <p>Crossed a landmark of 500+ completed projects across the Indian subcontinent.</p>
             </div>
           </div>
         </div>

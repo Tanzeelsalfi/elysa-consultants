@@ -170,7 +170,6 @@ export default function Home() {
         ></div>
 
         <div className="hero-content" data-animate="fadeUp">
-          <div className="hero-badge">Est. 2017 · Kashmir, India</div>
           <h1>
             Designing Modern
             <br />
@@ -241,11 +240,11 @@ export default function Home() {
               About <span className="highlight">Our Company</span>
             </h2>
             <p>
-              We are a Kashmir-based consultancy established in 2017, providing professional services in civil,
+              We are a premier consultancy established in 2017, providing professional services in civil,
               structural, and architectural engineering.
             </p>
             <p>
-              Our multidisciplinary team has delivered landmark projects across Kashmir and the wider Indian subcontinent
+              Our multidisciplinary team has delivered landmark projects across the Indian subcontinent
               — from residential homes to large-scale commercial developments.
             </p>
 
